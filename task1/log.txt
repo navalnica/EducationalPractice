@@ -1,0 +1,29 @@
+commit cf67972f812c4f34d7d48a2ca13701957df64d6a
+Author: Aliaksandr <cncntrt@gmail.com>
+Date:   Fri Feb 9 18:40:09 2018 +0300
+
+    status.txt added
+
+commit 7cae9fe07341352c1d7a53ffe15388d3b1954a35
+Author: Aliaksandr <cncntrt@gmail.com>
+Date:   Fri Feb 9 18:37:58 2018 +0300
+
+    .gitignore file added
+
+commit 837688e08e4595e7d72c9d32a2c3b015e1d0e848
+Author: Aliaksandr <cncntrt@gmail.com>
+Date:   Fri Feb 9 18:30:01 2018 +0300
+
+    .gitignore file removed
+
+commit 2b94440aaf188ee1e225e5da1205e454efa979ec
+Author: Aliaksandr <cncntrt@gmail.com>
+Date:   Fri Feb 9 18:19:58 2018 +0300
+
+    Repository cleaned. Will do tha task from beginning
+
+commit 6b22c229d409f49f74dba9bc376265667be401fe
+Author: yks72p <cncntrt@gmail.com>
+Date:   Tue Feb 6 08:36:37 2018 +0300
+
+    Initial commit
