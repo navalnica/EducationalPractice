@@ -11,7 +11,19 @@
 
 <div class="page">
 	<header>
-		<h2>The Instagram Clone</h2>
+		<div class="header-title">
+			<h2>The Instagram Clone</h2>
+		</div>
+
+		<div class="current-user-name">
+			<p>Sieviaryn Budrys</p>
+		</div>
+
+		<div class="header-buttons">
+			<button type="button" class="header-button">My Photos</button>
+			<button type="button" class="header-button">Upload</button>
+			<button type="button" class="header-button">Log Out</button>
+		</div>
 	</header>
 
 	<div class="container">
@@ -25,10 +37,18 @@
 		<div class="page-right-side">
 			<div class="filter">
 				<h3>Filter</h3>
-				<div class="form-row">
-				<label for="name">Name:</label>
-				<input type="text" id="name">
-			</div>
+				
+				<div class="filter-block">
+					<label for="date">Pick the Date</label>
+					<input type="date" name="date">					
+				</div>
+
+				<div class="filter-block">
+					<label for="author">Type the Author Name</label>
+					<input type="text" id="author">
+				</div>				
+
+				<button type="button" class="filter-apply">Apply</button>
 			</div>
 		</div>
 		
