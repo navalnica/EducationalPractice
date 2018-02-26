@@ -16,6 +16,8 @@ body {
     flex-basis: 90%;
 }
 
+/*--- container (the middle of the page) ---*/
+
 .container {
     background-color: #FFF;
     margin-top: 10px;
@@ -24,27 +26,24 @@ body {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    flex-wrap: wrap-reverse;
 }
 
 .page-left-side {
-    flex-basis: 5%;
+    flex-basis: 3%;
 }
 
 .page-right-side {
     padding: 10px;
 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
     flex-basis: 20%;
 }
 
-.content {
-    padding: 10px;
-    border: 2px solid lightgreen;
-    border-radius: 5px;
-
-    flex-basis: 70%;
-    display: flex;
-    flex-direction: column;
-}
+/*--- header ---*/
 
 header {
     border: 2px solid lightgreen;
@@ -53,6 +52,7 @@ header {
     display: flex;
     flex-direction: row;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .header-title {
@@ -66,7 +66,7 @@ header {
     flex: 2;
 }
 
-.header-buttons {
+.header-nav {
     margin-left: 10px;
     margin-right: 10px;
 
@@ -99,6 +99,8 @@ header {
     color: white;
 }
 
+/*--- footer ---*/
+
 footer {
     border: 2px solid lightgreen;
     border-radius: 5px;
@@ -118,6 +120,8 @@ footer {
 
     flex-basis: 60%;
 }
+
+/*--- filter ---*/
 
 .filter {
     border: 2px solid lightblue;
@@ -150,16 +154,17 @@ footer {
     justify-content: left;
 }
 
-.filter-block label {
-    margin-bottom: 10px;
-}
-
 .hashtag-input-static {
     width: 10px;
 }
 
+.hashtag-subdib {
+    display: flex;
+    justify-content: space-between;
+}
+
 .hashtag-input {
-    width: 70%;
+    width: 75%;
 }
 
 .hashtag-remove-button {
@@ -172,6 +177,10 @@ footer {
     text-align: center;
 
     cursor: pointer;
+}
+
+.filter-block label {
+    margin-bottom: 10px;
 }
 
 .filter-apply {
@@ -188,4 +197,110 @@ footer {
     padding-bottom: 5px;
     width: 40%;
     cursor: pointer;
+}
+
+/*--- load more button under the filter ---*/
+
+.load-more-button {
+    background-color: #4CAF50;
+    border-radius: 5px;
+    border: none;
+
+    font-size: 1em;
+    color: #FFFFFF;
+    text-align: center;
+
+    margin: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    width: 40%;
+    cursor: pointer;
+
+    justify-self: flex-end;
+}
+
+/*--- content ---*/
+
+.content {
+    padding: 10px;
+    border: 2px solid lightgreen;
+    border-radius: 5px;
+
+    flex-basis: 70%;
+    display: flex;
+    flex-direction: column;
+}
+
+.content-row {
+    margin-top: 15px;
+    margin-bottom: 15px;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.post {
+    border: 2px solid lightgray;
+    padding-left: 5px;
+    padding-right: 5px;
+    box-shadow:5px 5px 5px grey;
+
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+}
+
+.post-header {
+    border-bottom: 1px solid lightgray;
+    margin-top: 5px;
+    margin-bottom: 5px;
+
+    display: flex;
+    flex-direction: row;
+}
+
+.post-date {
+    text-align: left;
+
+    flex-basis: 35%;
+}
+
+.post-author {
+    text-align: right;
+
+    flex-basis: 65%;
+}
+
+.post-image {
+    height: 250px;
+}
+
+.post-likes {
+    border-bottom: 1px solid lightgray;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.post-likes img {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.post-details {
+    border: 1px solid lightgray;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    text-align: center;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.post p {
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
