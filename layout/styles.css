@@ -26,6 +26,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
+    align-items: center;
     flex-wrap: wrap-reverse;
 }
 
@@ -33,7 +34,8 @@ body {
     padding: 10px;
 
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
     flex-direction: row;
     flex-wrap: wrap;
 }
@@ -125,24 +127,36 @@ footer {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column;
+}
+
+.filter-date-author{
+	display: flex;
+	justify-content: space-around;
+	flex-direction: row;
+	flex-wrap: wrap;
 }
 
 .filter-block {
     padding-left: 10px;
     padding-right: 10px;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-top: 10px;
     text-align: center;
-    width: 80%;
 
     display: flex;
     flex-direction: column;
+    flex-wrap: wrap;
 }
 
-.filter-hashtag-block {
+.filter-hashtags{
+	display: flex;
+	flex-direction: row;
+}
+
+.hashtag-block {
     margin-bottom: 10px;
+    margin-right: 10px;
+    margin-left: 10px;
 
     display: flex;
     flex-direction: row;
@@ -160,7 +174,7 @@ footer {
 }
 
 .hashtag-input {
-    width: 75%;
+    width: 85%;
 }
 
 .hashtag-remove-button {
@@ -193,6 +207,8 @@ footer {
     padding-bottom: 5px;
     width: 40%;
     cursor: pointer;
+
+    justify-self: flex-end;
 }
 
 /*--- load more button under the filter ---*/
@@ -211,8 +227,6 @@ footer {
     padding-bottom: 5px;
     width: 40%;
     cursor: pointer;
-
-    justify-self: flex-end;
 }
 
 /*--- content ---*/
@@ -310,10 +324,11 @@ footer {
 
 /*--- media ---*/
 
-@media all and (min-width: 1380px) {
-    .container{
-        flex-direction: row;
-    }
+@media screen and (min-width: 1380px){
+	.container{
+		flex-direction: row;
+		align-items: normal;
+	}
 
     .content{
         order: 1;
@@ -321,15 +336,24 @@ footer {
     }
 
     .page-right-side{
+    	flex-direction: column;
+    	justify-content: space-between;
         flex-basis: 20%;
         order: 2;
-        flex-direction: column;
-        align-items: center;
     }
 
-    .filter {
+    .filter-date-author {
         flex-direction: column;
         justify-content: space-around;
+    }
+
+    .filter-block{
+	    flex-basis: 80%;
+	    flex-wrap: nowrap;
+    }
+
+    .filter-hashtags{
+    	flex-direction: column;
     }
 
     .filter-apply{

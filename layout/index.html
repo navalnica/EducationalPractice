@@ -273,15 +273,18 @@
                     <h3>Filter</h3>
                 </div>
 
-                <div class="filter-block">
-                    <label for="filter-date">Pick the Date</label>
-                    <input type="date" name="filer-date" id="filter-date">
-                </div>
+                <div class="filter-date-author">
+                	<div class="filter-block">
+	                    <label for="filter-date">Pick the Date</label>
+	                    <input type="date" name="filer-date" id="filter-date">
+	                </div>
 
-                <div class="filter-block">
-                    <label for="filter-author">Type the Author Name</label>
-                    <input type="text" placeholder="Author Name" name="filter-author" id="filter-author">
-                </div>
+	                <div class="filter-block">
+	                    <label for="filter-author">Type the Author Name</label>
+	                    <input type="text" placeholder="Author Name" name="filter-author" id="filter-author">
+	                </div>
+
+	            </div>
 
                 <div class="filter-block">
 
@@ -296,41 +299,44 @@
                         <option value="joy">
                     </datalist>
 
-                    <label for="filter-hashtag-1">Type some hashtags</label>
+                    <p>Type some hashtags</p>
 
-                    <div class="filter-hashtag-block">
-                        <input type="text" class="hashtag-input-static" value="#" disabled>
+                    <div class="filter-hashtags">
+                    	<div class="hashtag-block">
+	                        <input type="text" class="hashtag-input-static" value="#" disabled>
 
-                        <div class="hashtag-subdib">
-                            <input type="text" name="filter-hashtag-1" id="filter-hashtag-1"
-                                   placeholder="add hashtag" class="hashtag-input" value="sun"
-                                   list="hashtags-list">
+	                        <div class="hashtag-subdib">
+	                            <input type="text" name="filter-hashtag-1" id="filter-hashtag-1"
+	                                   placeholder="add hashtag" class="hashtag-input" value="sun"
+	                                   list="hashtags-list">
 
-                            <button type="button" class="hashtag-remove-button">-</button>
-                        </div>
+	                            <button type="button" class="hashtag-remove-button">-</button>
+	                        </div>
+	                    </div>
+
+	                    <div class="hashtag-block">
+	                        <input type="text" class="hashtag-input-static" value="#" disabled>
+
+	                        <div class="hashtag-subdib">
+	                            <input type="text" name="filter-hashtag-2" id="filter-hashtag-2"
+	                                   placeholder="add hashtag" class="hashtag-input" value="nature"
+	                                   list="hashtags-list">
+
+	                            <button type="button" class="hashtag-remove-button">-</button>
+	                        </div>
+	                    </div>
+
+	                    <div class="hashtag-block">
+	                        <input type="text" class="hashtag-input-static" value="#" disabled>
+
+	                        <div class="hashtag-subdib">
+	                            <input type="text" name="filter-hashtag-3" id="filter-hashtag-3"
+	                                   placeholder="add hashtag" class="hashtag-input"
+	                                   list="hashtags-list">
+	                        </div>
+	                    </div>
                     </div>
 
-                    <div class="filter-hashtag-block">
-                        <input type="text" class="hashtag-input-static" value="#" disabled>
-
-                        <div class="hashtag-subdib">
-                            <input type="text" name="filter-hashtag-2" id="filter-hashtag-2"
-                                   placeholder="add hashtag" class="hashtag-input" value="nature"
-                                   list="hashtags-list">
-
-                            <button type="button" class="hashtag-remove-button">-</button>
-                        </div>
-                    </div>
-
-                    <div class="filter-hashtag-block">
-                        <input type="text" class="hashtag-input-static" value="#" disabled>
-
-                        <div class="hashtag-subdib">
-                            <input type="text" name="filter-hashtag-3" id="filter-hashtag-3"
-                                   placeholder="add hashtag" class="hashtag-input"
-                                   list="hashtags-list">
-                        </div>
-                    </div>
                 </div>
 
                 <button type="button" class="filter-apply">Apply</button>
