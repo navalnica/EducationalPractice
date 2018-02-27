@@ -24,13 +24,9 @@ body {
     margin-bottom: 10px;
 
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    flex-direction: column;
+    justify-content: space-around;
     flex-wrap: wrap-reverse;
-}
-
-.page-left-side {
-    flex-basis: 3%;
 }
 
 .page-right-side {
@@ -38,9 +34,8 @@ body {
 
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    flex-direction: column;
-    flex-basis: 20%;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
 
 /*--- header ---*/
@@ -128,9 +123,10 @@ footer {
     border-radius: 5px;
 
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: space-around;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
 
 .filter-block {
@@ -226,9 +222,11 @@ footer {
     border: 2px solid lightgreen;
     border-radius: 5px;
 
-    flex-basis: 70%;
+    order: 2;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .content-row {
@@ -245,7 +243,8 @@ footer {
     border: 2px solid lightgray;
     padding-left: 5px;
     padding-right: 5px;
-    box-shadow:5px 5px 5px grey;
+    margin: 10px;
+    box-shadow: 5px 5px 5px grey;
 
     display: flex;
     flex-direction: column;
@@ -286,6 +285,10 @@ footer {
 }
 
 .post-likes img {
+    cursor: pointer;
+}
+
+.post-likes img {
     margin-left: 5px;
     margin-right: 5px;
 }
@@ -303,4 +306,33 @@ footer {
 .post p {
     margin-top: 5px;
     margin-bottom: 5px;
+}
+
+/*--- media ---*/
+
+@media all and (min-width: 1380px) {
+    .container{
+        flex-direction: row;
+    }
+
+    .content{
+        order: 1;
+        flex-basis: 75%;
+    }
+
+    .page-right-side{
+        flex-basis: 20%;
+        order: 2;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .filter {
+        flex-direction: column;
+        justify-content: space-around;
+    }
+
+    .filter-apply{
+        justify-self: flex-end;
+    }
 }
