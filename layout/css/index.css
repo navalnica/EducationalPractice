@@ -345,6 +345,7 @@ footer {
     .filter-date-author {
         flex-direction: column;
         justify-content: space-around;
+        flex-wrap: nowrap;
     }
 
     .filter-block{
