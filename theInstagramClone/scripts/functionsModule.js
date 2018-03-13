@@ -1,4 +1,8 @@
-// TODO: add likes and hashtags to the post
+/*
+   add required string property length to the schema
+   add support of hashtags and likes in editing, paginating and maybe other methods
+   alter validation of the id parameter in some methods. maybe use schema
+*/
 
 var functionsModule = function () {
 
@@ -7,12 +11,20 @@ var functionsModule = function () {
     var posts = dataModule.posts;
 
     var postSchema = {
-        id: "",
-        author: "",
-        description: "",
-        createdAt: new Date(),
-        photoLink: "",
-        active: true
+        id: {constructorName: 'String'},
+        author: {constructorName: 'String'},
+        description: {constructorName: 'String'},
+        createdAt: {constructorName: 'Date'},
+        photoLink: {constructorName: 'String'},
+        hashtags: {
+            constructorName: 'Array',
+            elementsConstructorName: 'String'
+        },
+        likesFrom: {
+            constructorName: 'Array',
+            elementsConstructorName: 'String'
+        },
+        active: {constructorName: 'Boolean'}
     };
 
     var getPaginatedPosts = function (skip, length, filterConfig) {
@@ -21,7 +33,7 @@ var functionsModule = function () {
         length = length || 10;
 
         var tmpPosts = posts.filter(function (item) {
-            return item.active === true && validatePost(item);
+            return item.active && validatePost(item);
         });
 
         // sort by date
@@ -52,6 +64,16 @@ var functionsModule = function () {
                     return;
                 }
             }
+
+            if (filterConfig.hashtags) {
+                // if (filterConfig.hashtags.constructor.name !== 'Array'){
+                //     return;
+                // }
+                // tmpPosts = tmpPosts.filter(function(item){
+                //     return fil
+                // })
+            }
+
         }
 
         return tmpPosts.slice(skip, skip + length);
@@ -59,31 +81,44 @@ var functionsModule = function () {
 
 
     function getPostById(id) {
-        if (id === undefined)
-            return undefined;
-        if (typeof id !== 'string')
-            return undefined;
+        if (id === undefined) {
+            return;
+        }
+        if (typeof id !== 'string') {
+            return;
+        }
 
         return posts.find(function (p) {
             return p.id === id;
         });
     }
 
-    function validatePostBySchema(obj) {
-        if (obj === undefined) {
+    function validatePostBySchema(p) {
+        if (!p) {
             return false;
         }
 
-        if (Object.keys(postSchema).length !== Object.keys(obj).length) {
+        if (Object.keys(postSchema).length !== Object.keys(p).length) {
             return false;
         }
 
         for (var key in postSchema) {
-            if (obj[key] === null || obj[key] === undefined) {
+            if (p[key] === undefined || p[key] === null) {
                 return false;
             }
-            if (postSchema[key].constructor.name !== obj[key].constructor.name) {
+            if (postSchema[key].constructorName !== p[key].constructor.name) {
                 return false;
+            }
+            if (postSchema[key].constructorName === 'Array') {
+                var b = true;
+                p[key].forEach(function (item) {
+                    if (item.constructor.name !== postSchema[key].elementsConstructorName) {
+                        b = false;
+                    }
+                });
+                if (!b) {
+                    return false;
+                }
             }
         }
 
@@ -116,11 +151,10 @@ var functionsModule = function () {
         if (!validatePost(newPost))
             return false;
 
-        // check if element with the same id exists in array
-        if (posts.some(function (element) {
-                return element.id === newPost.id;
-            }))
+        var prevPost = getPostById(newPost.id);
+        if (prevPost) {
             return false;
+        }
 
         posts.push(newPost);
         return true;
@@ -175,7 +209,7 @@ var functionsModule = function () {
     }
 
     // we do not remove posts permanently
-    // but only set 'active' field to false
+    // but only set 'active' field to falsef
     function removePost(id) {
         if (id === undefined)
             return false;
@@ -254,6 +288,8 @@ var functionsModule = function () {
             createdAt: new Date('2018-2-23T23:00:00'),
             author: 'admin',
             photoLink: '/photos/newPost1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         };
         console.log('newPost1:');
@@ -281,6 +317,8 @@ var functionsModule = function () {
             createdAt: new Date('2018-2-23T23:00:00'),
             author: 'admin',
             photoLink: '/photos/newPost3',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         };
         console.log('newPost3:');

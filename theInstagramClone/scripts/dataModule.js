@@ -8,6 +8,8 @@ var dataModule = function () {
             createdAt: new Date('2018-03-23T23:00:00'),
             author: 'pasa',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -17,6 +19,8 @@ var dataModule = function () {
             createdAt: new Date('2018-04-23T23:00:00'),
             author: 'admin',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'hello'],
             active: true
         },
 
@@ -26,6 +30,8 @@ var dataModule = function () {
             createdAt: new Date('2018-02-23T23:00:00'),
             author: 'koscia',
             photoLink: '/photos/photo1',
+            hashtags: ['kek'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -35,6 +41,8 @@ var dataModule = function () {
             createdAt: new Date('2018-10-23T23:00:00'),
             author: 'admin',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -44,6 +52,8 @@ var dataModule = function () {
             createdAt: new Date('2018-11-23T23:00:00'),
             author: 'koscia',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -53,6 +63,8 @@ var dataModule = function () {
             createdAt: new Date('2018-01-23T23:00:00'),
             author: 'admin',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -62,6 +74,8 @@ var dataModule = function () {
             createdAt: new Date('2018-10-23T23:00:00'),
             author: 'koscia',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -71,6 +85,8 @@ var dataModule = function () {
             createdAt: new Date('2018-02-22T23:00:00'),
             author: 'admin',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -80,6 +96,8 @@ var dataModule = function () {
             createdAt: new Date('2018-2-13T23:00:00'),
             author: 'admin',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -89,6 +107,8 @@ var dataModule = function () {
             createdAt: new Date('2018-2-10T23:00:00'),
             author: 'pasa',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: false
         },
 
@@ -98,6 +118,8 @@ var dataModule = function () {
             createdAt: new Date('2018-10-23T23:00:00'),
             author: 'koscia',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -107,6 +129,8 @@ var dataModule = function () {
             createdAt: new Date('2018-10-23T23:00:00'),
             author: 'admin',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -116,6 +140,8 @@ var dataModule = function () {
             createdAt: new Date('2018-10-24T23:00:00'),
             author: 'admin',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -125,6 +151,8 @@ var dataModule = function () {
             createdAt: new Date('2018-10-20T23:00:00'),
             author: 'admin',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -134,6 +162,8 @@ var dataModule = function () {
             createdAt: new Date('2018-11-23T23:00:00'),
             author: 'admin',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -143,6 +173,8 @@ var dataModule = function () {
             createdAt: new Date('2018-10-23T23:00:00'),
             author: 'admin',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -152,6 +184,8 @@ var dataModule = function () {
             createdAt: new Date('2018-10-23T23:00:00'),
             author: 'admin',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -161,6 +195,8 @@ var dataModule = function () {
             createdAt: new Date('2018-10-23T23:00:00'),
             author: 'admin',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -170,6 +206,8 @@ var dataModule = function () {
             createdAt: new Date('2018-10-23T23:00:00'),
             author: 'admin',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         },
 
@@ -179,6 +217,8 @@ var dataModule = function () {
             createdAt: new Date('2018-10-23T23:00:00'),
             author: 'admin',
             photoLink: '/photos/photo1',
+            hashtags: ['firstTag', 'seondTag'],
+            likesFrom: ['arsieni', 'admin'],
             active: true
         }
 
