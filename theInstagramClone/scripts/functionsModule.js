@@ -1,9 +1,3 @@
-/*
-   add required string property length to the schema
-   add support of hashtags and likes in editing, paginating and maybe other methods
-   alter validation of the id parameter in some methods. maybe use schema
-*/
-
 var functionsModule = function () {
 
     'use strict';
@@ -11,11 +5,27 @@ var functionsModule = function () {
     var posts = dataModule.posts;
 
     var postSchema = {
-        id: {constructorName: 'String'},
-        author: {constructorName: 'String'},
-        description: {constructorName: 'String'},
+        id: {
+            constructorName: 'String',
+            minLength: 1,
+            maxLength: 200
+        },
+        user: {
+            constructorName: 'String',
+            minLength: 1,
+            maxLength: 200
+        },
+        description: {
+            constructorName: 'String',
+            minLength: 1,
+            maxLength: 200
+        },
         createdAt: {constructorName: 'Date'},
-        photoLink: {constructorName: 'String'},
+        photoLink: {
+            constructorName: 'String',
+            minLength: 1,
+            maxLength: 1000
+        },
         hashtags: {
             constructorName: 'Array',
             elementsConstructorName: 'String'
@@ -54,10 +64,10 @@ var functionsModule = function () {
                 }
             }
 
-            if (filterConfig.author) {
-                if (typeof filterConfig.author === 'string') {
+            if (filterConfig.user) {
+                if (filterConfig.user.constructor.name === 'String') {
                     tmpPosts = tmpPosts.filter(function (item) {
-                        return item.author === filterConfig.author;
+                        return item.user === filterConfig.user;
                     });
                 }
                 else {
@@ -66,12 +76,14 @@ var functionsModule = function () {
             }
 
             if (filterConfig.hashtags) {
-                // if (filterConfig.hashtags.constructor.name !== 'Array'){
-                //     return;
-                // }
-                // tmpPosts = tmpPosts.filter(function(item){
-                //     return fil
-                // })
+                if (filterConfig.hashtags.constructor.name !== 'Array') {
+                    return;
+                }
+                tmpPosts = tmpPosts.filter(function (post) {
+                    return filterConfig.hashtags.every(function (tag) {
+                        return post.hashtags.indexOf(tag) >= 0;
+                    });
+                });
             }
 
         }
@@ -84,7 +96,7 @@ var functionsModule = function () {
         if (id === undefined) {
             return;
         }
-        if (typeof id !== 'string') {
+        if (id.constructor.name !== postSchema.id.constructorName) {
             return;
         }
 
@@ -93,7 +105,7 @@ var functionsModule = function () {
         });
     }
 
-    function validatePostBySchema(p) {
+    function validatePost(p) {
         if (!p) {
             return false;
         }
@@ -109,6 +121,12 @@ var functionsModule = function () {
             if (postSchema[key].constructorName !== p[key].constructor.name) {
                 return false;
             }
+            if (postSchema[key].constructorName === 'String') {
+                if (p[key].length < postSchema[key].minLength ||
+                    p[key].length > postSchema[key].maxLength) {
+                    return false;
+                }
+            }
             if (postSchema[key].constructorName === 'Array') {
                 var b = true;
                 p[key].forEach(function (item) {
@@ -120,28 +138,6 @@ var functionsModule = function () {
                     return false;
                 }
             }
-        }
-
-        return true;
-    }
-
-    function validatePost(post) {
-        if (!validatePostBySchema(post)) {
-            return false;
-        }
-
-        if (post.id.length === 0) {
-            return false;
-        }
-        if (post.author.length === 0) {
-            return false;
-        }
-        if (post.description.length >= 200 ||
-            post.description.length == 0) {
-            return false;
-        }
-        if (post.photoLink.length === 0) {
-            return false;
         }
 
         return true;
@@ -178,13 +174,15 @@ var functionsModule = function () {
                     return false;
                 }
                 switch (prop) {
-                    case 'description': {
+                    case 'description':
+                    case 'photoLink': {
                         editedPost[prop] = input[prop];
                     }
                         break;
 
-                    case 'photoLink': {
-                        editedPost[prop] = input[prop];
+                    case 'hashtags':
+                    case 'likesFrom': {
+                        editedPost[prop] = input[prop].slice();
                     }
                         break;
 
@@ -211,11 +209,6 @@ var functionsModule = function () {
     // we do not remove posts permanently
     // but only set 'active' field to falsef
     function removePost(id) {
-        if (id === undefined)
-            return false;
-        if (typeof id !== 'string')
-            return false;
-
         var postToRemove = getPostById(id);
         if (postToRemove === undefined) {
             return false;
@@ -257,28 +250,33 @@ var functionsModule = function () {
 
         // --------------- paginating posts --------------------
         console.log('--------------- paginating posts --------------------');
-        var paginated = getPaginatedPosts(null, null, {author: 'admin'});
+        var paginated = getPaginatedPosts(null, null, {user: 'admin'});
         console.log('admin\'s posts:');
         console.log(paginated);
 
-        paginated = getPaginatedPosts(3, 2, {author: 'admin'});
+        paginated = getPaginatedPosts(3, 2, {user: 'admin'});
         console.log('2 admin\'s posts starting from 3rd:');
         console.log(paginated);
 
-        paginated = getPaginatedPosts(0, 0, {date: new Date('2018-10-23T23:00:00')});
-        console.log('posts created on 2018-10-23:');
+        paginated = getPaginatedPosts(0, 0, {date: new Date('2018-03-21T23:00:00')});
+        console.log('posts created on 2018-03-21:');
         console.log(paginated);
 
         paginated = getPaginatedPosts(0, 0, {
-            date: new Date('2018-10-23T23:00:00'),
-            author: 'koscia'
+            date: new Date('2018-03-21T23:00:00'),
+            user: 'koscia'
         });
-        console.log('posts created on 2018-10-23 by \'koscia\':');
+        console.log('posts created on 2018-03-21 by \'koscia\':');
         console.log(paginated);
 
         console.log('paginating with illegal filterConfig parameter:');
-        paginated = getPaginatedPosts(0, 0, {author: 3});
+        paginated = getPaginatedPosts(0, 0, {user: 3});
         console.log(paginated);
+
+        paginated = getPaginatedPosts(0, 0, {user: 'koscia', hashtags: ["sunset"]});
+        console.log("posts with 'sunset' hashtag:");
+        console.log(paginated);
+        console.table(paginated, ['id', 'user', 'hashtags']);
 
         // --------------- adding new posts --------------------
         console.log('--------------- adding new posts --------------------');
@@ -286,9 +284,9 @@ var functionsModule = function () {
             id: 'unique-1',
             description: "new posts 1",
             createdAt: new Date('2018-2-23T23:00:00'),
-            author: 'admin',
+            user: 'admin',
             photoLink: '/photos/newPost1',
-            hashtags: ['firstTag', 'seondTag'],
+            hashtags: [],
             likesFrom: ['arsieni', 'admin'],
             active: true
         };
@@ -301,7 +299,7 @@ var functionsModule = function () {
             id: 'unique-2',
             description: "new posts 2",
             createdAt: new Date('2018-2-23T23:00:00'),
-            author: 'admin',
+            user: 'admin',
             photoLink: '/photos/newPost2',
             active: true,
             extraProperty: 'cool property'
@@ -315,7 +313,7 @@ var functionsModule = function () {
             id: '1',
             description: "new posts 3",
             createdAt: new Date('2018-2-23T23:00:00'),
-            author: 'admin',
+            user: 'admin',
             photoLink: '/photos/newPost3',
             hashtags: ['firstTag', 'seondTag'],
             likesFrom: ['arsieni', 'admin'],
@@ -340,7 +338,9 @@ var functionsModule = function () {
 
         var toEdit1 = {
             description: "First description",
-            photoLink: "../photos/firstLink.jpg"
+            photoLink: "../photos/firstLink.jpg",
+            hashtags: ['testing', 'hashtags'],
+            likesFrom: ['admin', 'admin', 'admin']
         };
         console.log('toEdit1 object:');
         console.log(toEdit1);
