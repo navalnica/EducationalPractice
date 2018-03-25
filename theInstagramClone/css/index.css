@@ -73,7 +73,7 @@ header {
     justify-content: flex-start;
 }
 
-.header-button {
+.button-with-hover {
     min-width: 130px;
 
     background-color: #FFFFFF;
@@ -91,7 +91,7 @@ header {
     transition-duration: 0.5s;
 }
 
-.header-button:hover {
+.button-with-hover:hover {
     background-color: lightseagreen;
     color: white;
 }
@@ -194,7 +194,7 @@ footer {
     margin-bottom: 10px;
 }
 
-.filter-button{
+.filter-button {
     border-radius: 5px;
     font-size: 1em;
     color: #FFFFFF;
@@ -212,7 +212,7 @@ footer {
     border: none;
 }
 
-.filter-clear{
+.filter-clear {
     border: 2px solid lightseagreen;
     color: lightseagreen;
     background-color: #FFFFFF;
@@ -379,4 +379,101 @@ footer {
     .filter-apply {
         justify-self: flex-end;
     }
+}
+
+/* modal window styling */
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 60px; /* Location of the box */
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.6); /* Black w/ opacity */
+}
+
+.modal-post {
+    /*position: relative;*/
+    background-color: #ffffff;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 70%;
+    height: 80%;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+
+    overflow: auto; /* Enable scroll if needed */
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.modal-post-image {
+    flex-basis: 80%;
+    display: flex;
+}
+
+.modal-post-image img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+
+    margin: auto;
+}
+
+.modal-post-aside {
+    flex-basis: 20%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.modal-post-details {
+    border: 2px solid lightgray;
+    border-radius: 5px;
+    padding: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.modal-post-details h4 {
+    margin: 2px;
+}
+
+.modal-post-buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.modal-post-likes {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.modal-post-likes-image {
+    cursor: pointer;
+}
+
+.modal-post-likes-number {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.modal-post-delete:hover {
+    background-color: crimson;
+    border: 2px solid crimson;
 }

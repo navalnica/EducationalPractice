@@ -9,13 +9,17 @@
 
     <!--   scripts   -->
     <script src="scripts/dataModule.js"></script>
-    <script src="scripts/functionsModule.js"></script>
-    <script src="scripts/main.js"></script>
-    <script src="scripts/view.js"></script>
+    <script src="scripts/controllerModule.js"></script>
+    <script src="scripts/viewModule.js"></script>
 
 </head>
 
 <body>
+
+<div class="modal">
+
+
+</div>
 
 <div class="page">
     <header>
@@ -28,10 +32,10 @@
         </div>
 
         <nav class="header-nav">
-            <button type="button" id="log-out" class="header-button">Log Out</button>
-            <button type="button" id="my-photos" class="header-button">My Photos</button>
-            <button type="button" id="upload-photo" class="header-button">Upload</button>
-            <button type="button" id="log-in" class="header-button">Log In</button>
+            <button type="button" id="log-out" class="button-with-hover">Log Out</button>
+            <button type="button" id="my-photos" class="button-with-hover">My Photos</button>
+            <button type="button" id="upload-photo" class="button-with-hover">Upload</button>
+            <button type="button" id="log-in" class="button-with-hover">Log In</button>
         </nav>
     </header>
 
@@ -117,7 +121,7 @@
         </div>
 
         <div class="post-image">
-            <img src="photos/img1.jpeg" alt="fishing with Uladzimir"
+            <img src="photos/img1.jpeg" alt="the post image"
                  width="250" height="250">
         </div>
 
@@ -143,6 +147,53 @@
 
             <button type="button" class="hashtag-remove-button">-</button>
         </div>
+    </div>
+</template>
+
+<template id="modal-post">
+    <div class="modal-post">
+
+        <div class="modal-post-image">
+            <img alt="modal post window image" src="photos/img3.jpeg">
+        </div>
+
+        <aside class="modal-post-aside">
+
+            <div class="modal-post-details">
+
+                <h4>User:</h4>
+                <div class="modal-post-user"></div>
+
+                <h4>Created At:</h4>
+                <div class="modal-post-date"></div>
+
+                <h4>Description:</h4>
+                <div class="modal-post-description"></div>
+
+                <h4>Hashtags:</h4>
+                <div class="modal-post-hashtags"></div>
+
+            </div>
+
+            <div class="modal-post-buttons">
+                <div class="modal-post-like">
+
+                    <div class="modal-post-likes">
+
+                        <div class="modal-post-likes-image"><img src="" alt="likes: "></div>
+                        <div class="modal-post-likes-number">223</div>
+
+                    </div>
+
+                </div>
+
+                <button class="modal-post-edit button-with-hover">Edit Post</button>
+                <button class="modal-post-delete button-with-hover">Delete Post</button>
+
+            </div>
+
+        </aside>
+
     </div>
 </template>
 

@@ -2,6 +2,39 @@ var dataModule = function () {
 
     var users = [ 'admin', 'koscia', 'pasa', 'arsieni' ];
 
+    var postSchema = {
+        id: {
+            constructorName: 'String',
+            minLength: 1,
+            maxLength: 200
+        },
+        user: {
+            constructorName: 'String',
+            minLength: 1,
+            maxLength: 200
+        },
+        description: {
+            constructorName: 'String',
+            minLength: 1,
+            maxLength: 200
+        },
+        createdAt: {constructorName: 'Date'},
+        photoLink: {
+            constructorName: 'String',
+            minLength: 1,
+            maxLength: 1000
+        },
+        hashtags: {
+            constructorName: 'Array',
+            elementsConstructorName: 'String'
+        },
+        likesFrom: {
+            constructorName: 'Array',
+            elementsConstructorName: 'String'
+        },
+        active: {constructorName: 'Boolean'}
+    };
+
     var posts = [
 
         {
@@ -195,7 +228,7 @@ var dataModule = function () {
             id: '18',
             user: 'koscia',
             description: 'another dummy descriptions',
-            createdAt: new Date('2018-03-23T23:00:00'),
+            createdAt: new Date('2018-09-23T23:00:00'),
             photoLink: 'photos/img11.jpeg',
             hashtags: ['rain', 'evening'],
             likesFrom: ['pasa'],
@@ -229,6 +262,7 @@ var dataModule = function () {
 
     return {
         users: users,
+        postSchema: postSchema,
         posts: posts
     }
 
