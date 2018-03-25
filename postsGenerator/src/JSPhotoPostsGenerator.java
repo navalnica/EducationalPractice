@@ -22,9 +22,11 @@ public class JSPhotoPostsGenerator {
     };
 
     private String[] photoLinks = {
-            "/photos/karatkievic1.jpg",
-            "/photos/karatkievic2.jpg",
-            "/photos/karatkievic3.jpg"
+            "photos/img10.jpeg", "photos/img11.jpeg", "photos/img12.jpeg",
+            "photos/img13.jpeg", "photos/img14.jpeg", "photos/img1.jpeg",
+            "photos/img2.jpeg", "photos/img3.jpeg", "photos/img4.jpeg",
+            "photos/img5.jpeg", "photos/img6.jpeg", "photos/img7.jpeg",
+            "photos/img8.jpeg", "photos/img9.jpeg"
     };
 
     private String[] hashtags = {
