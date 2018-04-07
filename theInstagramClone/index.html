@@ -9,11 +9,17 @@
 
     <!--   scripts   -->
     <script src="scripts/dataModule.js"></script>
-    <script src="scripts/functionsModule.js"></script>
+    <script src="scripts/controllerModule.js"></script>
+    <script src="scripts/viewModule.js"></script>
 
 </head>
 
 <body>
+
+<div class="modal">
+
+
+</div>
 
 <div class="page">
     <header>
@@ -26,328 +32,72 @@
         </div>
 
         <nav class="header-nav">
-            <button type="button" class="header-button">My Photos</button>
-            <button type="button" class="header-button">Upload</button>
-            <button type="button" class="header-button">Log Out</button>
+            <button type="button" id="log-out" class="button-with-hover">Log Out</button>
+            <button type="button" id="my-photos" class="button-with-hover">My Photos</button>
+            <button type="button" id="upload-photo" class="button-with-hover">Upload</button>
+            <button type="button" id="log-in" class="button-with-hover">Log In</button>
         </nav>
     </header>
 
     <div class="container">
 
-        <section class="content">
+        <section id="content">
 
-            <div class="post">
-                <div class="post-header">
-                    <div class="post-date">
-                        <p>20.12.1980</p>
-                    </div>
-                    <div class="post-author">
-                        <p>Karatkievic</p>
-                    </div>
-                </div>
-
-                <div class="post-image">
-                    <img src="photos/karatkievic3.jpg" alt="fishing with Uladzimir"
-                         width="250" height="250">
-                </div>
-
-                <div class="post-details">
-                    <div class="post-likes">
-                        <img src="icons/heart_empty_32.png" alt="likes: ">
-                        <p>180</p>
-                    </div>
-                    <div class="post-hashtags">
-                        <p>#aspiring #rest #nature #lunch ...</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="post">
-                <div class="post-header">
-                    <div class="post-date">
-                        <p>20.12.1980</p>
-                    </div>
-                    <div class="post-author">
-                        <p>Karatkievic</p>
-                    </div>
-                </div>
-
-                <div class="post-image">
-                    <img src="photos/karatkievic1.jpg" alt="fishing with Uladzimir"
-                         width="250" height="250">
-                </div>
-
-                <div class="post-details">
-                    <div class="post-likes">
-                        <img src="icons/heart_full_32.png" alt="likes: ">
-                        <p>223</p>
-                    </div>
-                    <div class="post-hashtags">
-                        <p>#rest #fishing #nature</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="post">
-                <div class="post-header">
-                    <div class="post-date">
-                        <p>20.12.1980</p>
-                    </div>
-                    <div class="post-author">
-                        <p>Karatkievic</p>
-                    </div>
-                </div>
-
-                <div class="post-image">
-                    <img src="photos/karatkievic2.jpg" alt="fishing with Uladzimir"
-                         width="250" height="250">
-                </div>
-
-                <div class="post-details">
-                    <div class="post-likes">
-                        <img src="icons/heart_empty_32.png" alt="likes: ">
-                        <p>132</p>
-                    </div>
-                    <div class="post-hashtags">
-                        <p>#tranquil #half-face #nature</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="post">
-                <div class="post-header">
-                    <div class="post-date">
-                        <p>20.12.1980</p>
-                    </div>
-                    <div class="post-author">
-                        <p>Karatkievic</p>
-                    </div>
-                </div>
-
-                <div class="post-image">
-                    <img src="photos/karatkievic3.jpg" alt="fishing with Uladzimir"
-                         width="250" height="250">
-                </div>
-
-                <div class="post-details">
-                    <div class="post-likes">
-                        <img src="icons/heart_empty_32.png" alt="likes: ">
-                        <p>180</p>
-                    </div>
-                    <div class="post-hashtags">
-                        <p>#aspiring #rest #nature #lunch ...</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="post">
-                <div class="post-header">
-                    <div class="post-date">
-                        <p>20.12.1980</p>
-                    </div>
-                    <div class="post-author">
-                        <p>Karatkievic</p>
-                    </div>
-                </div>
-
-                <div class="post-image">
-                    <img src="photos/karatkievic1.jpg" alt="fishing with Uladzimir"
-                         width="250" height="250">
-                </div>
-
-                <div class="post-details">
-                    <div class="post-likes">
-                        <img src="icons/heart_full_32.png" alt="likes: ">
-                        <p>223</p>
-                    </div>
-                    <div class="post-hashtags">
-                        <p>#rest #fishing #nature</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="post">
-                <div class="post-header">
-                    <div class="post-date">
-                        <p>20.12.1980</p>
-                    </div>
-                    <div class="post-author">
-                        <p>Karatkievic</p>
-                    </div>
-                </div>
-
-                <div class="post-image">
-                    <img src="photos/karatkievic2.jpg" alt="fishing with Uladzimir"
-                         width="250" height="250">
-                </div>
-
-                <div class="post-details">
-                    <div class="post-likes">
-                        <img src="icons/heart_empty_32.png" alt="likes: ">
-                        <p>132</p>
-                    </div>
-                    <div class="post-hashtags">
-                        <p>#tranquil #half-face #nature</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="post">
-                <div class="post-header">
-                    <div class="post-date">
-                        <p>20.12.1980</p>
-                    </div>
-                    <div class="post-author">
-                        <p>Karatkievic</p>
-                    </div>
-                </div>
-
-                <div class="post-image">
-                    <img src="photos/karatkievic3.jpg" alt="fishing with Uladzimir"
-                         width="250" height="250">
-                </div>
-
-                <div class="post-details">
-                    <div class="post-likes">
-                        <img src="icons/heart_empty_32.png" alt="likes: ">
-                        <p>180</p>
-                    </div>
-                    <div class="post-hashtags">
-                        <p>#aspiring #rest #nature #lunch ...</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="post">
-                <div class="post-header">
-                    <div class="post-date">
-                        <p>20.12.1980</p>
-                    </div>
-                    <div class="post-author">
-                        <p>Karatkievic</p>
-                    </div>
-                </div>
-
-                <div class="post-image">
-                    <img src="photos/karatkievic1.jpg" alt="fishing with Uladzimir"
-                         width="250" height="250">
-                </div>
-
-                <div class="post-details">
-                    <div class="post-likes">
-                        <img src="icons/heart_full_32.png" alt="likes: ">
-                        <p>223</p>
-                    </div>
-                    <div class="post-hashtags">
-                        <p>#rest #fishing #nature</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="post">
-                <div class="post-header">
-                    <div class="post-date">
-                        <p>20.12.1980</p>
-                    </div>
-                    <div class="post-author">
-                        <p>Karatkievic</p>
-                    </div>
-                </div>
-
-                <div class="post-image">
-                    <img src="photos/karatkievic2.jpg" alt="fishing with Uladzimir"
-                         width="250" height="250">
-                </div>
-
-                <div class="post-details">
-                    <div class="post-likes">
-                        <img src="icons/heart_empty_32.png" alt="likes: ">
-                        <p>132</p>
-                    </div>
-                    <div class="post-hashtags">
-                        <p>#tranquil #half-face #nature</p>
-                    </div>
-                </div>
-            </div>
+            <!-- the posts will be located here -->
 
         </section>
 
-        <aside class="page-right-side">
-            <div class="filter">
-                <div class="filter-header">
-                    <h3>Filter</h3>
+        <aside class="right-block">
+            <form name="filter-form" id="filter-form" action="#">
+
+
+                <h3>Filter</h3>
+
+                <div class="filter-date-user">
+                    <div class="filter-block">
+                        <label for="filter-date">Pick the Date</label>
+                        <input type="date" name="filter-date" id="filter-date">
+                    </div>
+
+                    <div class="filter-block">
+                        <label for="filter-user">Select the User</label>
+                        <!--<input type="text" placeholder="User Name" name="filter-user" id="filter-user">-->
+                        <select id="filter-user" name="filter-user"></select>
+                    </div>
+
                 </div>
 
-                <div class="filter-date-author">
-                	<div class="filter-block">
-	                    <label for="filter-date">Pick the Date</label>
-	                    <input type="date" name="filer-date" id="filter-date">
-	                </div>
-
-	                <div class="filter-block">
-	                    <label for="filter-author">Type the Author Name</label>
-	                    <input type="text" placeholder="Author Name" name="filter-author" id="filter-author">
-	                </div>
-
-	            </div>
-
                 <div class="filter-block">
-
-                    <datalist id="hashtags-list">
-                        <option value="sun">
-                        <option value="no_filter">
-                        <option value="nature">
-                        <option value="night">
-                        <option value="noFilter">
-                        <option value="rest">
-                        <option value="fishing">
-                        <option value="joy">
-                    </datalist>
 
                     <p>Type some hashtags</p>
 
                     <div class="filter-hashtags">
-                    	<div class="hashtag-block">
-	                        <input type="text" class="hashtag-input-static" value="#" disabled>
 
-	                        <div class="hashtag-subdib">
-	                            <input type="text" name="filter-hashtag-1" id="filter-hashtag-1"
-	                                   placeholder="add hashtag" class="hashtag-input" value="sun"
-	                                   list="hashtags-list">
+                        <div class="hashtag-block">
+                            <input type="text" class="hashtag-input-static" value="#" disabled>
 
-	                            <button type="button" class="hashtag-remove-button">-</button>
-	                        </div>
-	                    </div>
+                            <div class="hashtag-subdib">
+                                <input type="text" name="filter-hashtag"
+                                       placeholder="add hashtag" class="hashtag-input">
 
-	                    <div class="hashtag-block">
-	                        <input type="text" class="hashtag-input-static" value="#" disabled>
+                                <button type="button" class="hashtag-remove-button">-</button>
+                            </div>
+                        </div>
 
-	                        <div class="hashtag-subdib">
-	                            <input type="text" name="filter-hashtag-2" id="filter-hashtag-2"
-	                                   placeholder="add hashtag" class="hashtag-input" value="nature"
-	                                   list="hashtags-list">
-
-	                            <button type="button" class="hashtag-remove-button">-</button>
-	                        </div>
-	                    </div>
-
-	                    <div class="hashtag-block">
-	                        <input type="text" class="hashtag-input-static" value="#" disabled>
-
-	                        <div class="hashtag-subdib">
-	                            <input type="text" name="filter-hashtag-3" id="filter-hashtag-3"
-	                                   placeholder="add hashtag" class="hashtag-input"
-	                                   list="hashtags-list">
-	                        </div>
-	                    </div>
                     </div>
 
                 </div>
 
-                <button type="button" class="filter-apply">Apply</button>
-            </div>
+                <div class="filter-buttons-container">
+                    <button type="button" class="filter-button filter-apply">Apply</button>
+                    <button type="button" class="filter-button filter-clear">Clear</button>
+                </div>
+
+
+            </form>
 
             <button class="load-more-button">Load More</button>
+
         </aside>
 
     </div>
@@ -362,6 +112,90 @@
 
 </div>
 
+
+<template id="post-template">
+    <div class="post">
+        <div class="post-header">
+            <div class="post-date"></div>
+            <div class="post-user"></div>
+        </div>
+
+        <div class="post-image">
+            <img src="photos/img1.jpeg" alt="the post image"
+                 width="250" height="250">
+        </div>
+
+        <div class="post-details">
+            <div class="post-likes">
+                <div class="post-likes-image">
+                    <img src="icons/heart_full_32.png" alt="likes: ">
+                </div>
+                <div class="post-likes-number">223</div>
+            </div>
+            <div class="post-hashtags">#rest #fishing #nature</div>
+        </div>
+    </div>
+</template>
+
+<template id="filter-hashtag-block">
+    <div class="hashtag-block">
+        <input type="text" class="hashtag-input-static" value="#" disabled>
+
+        <div class="hashtag-subdib">
+            <input type="text" name="filter-hashtag"
+                   placeholder="add hashtag" class="hashtag-input">
+
+            <button type="button" class="hashtag-remove-button">-</button>
+        </div>
+    </div>
+</template>
+
+<template id="modal-post">
+    <div class="modal-post">
+
+        <div class="modal-post-image">
+            <img alt="modal post window image" src="photos/img3.jpeg">
+        </div>
+
+        <aside class="modal-post-aside">
+
+            <div class="modal-post-details">
+
+                <h4>User:</h4>
+                <div class="modal-post-user"></div>
+
+                <h4>Created At:</h4>
+                <div class="modal-post-date"></div>
+
+                <h4>Description:</h4>
+                <div class="modal-post-description"></div>
+
+                <h4>Hashtags:</h4>
+                <div class="modal-post-hashtags"></div>
+
+            </div>
+
+            <div class="modal-post-buttons">
+                <div class="modal-post-like">
+
+                    <div class="modal-post-likes">
+
+                        <div class="modal-post-likes-image"><img src="" alt="likes: "></div>
+                        <div class="modal-post-likes-number">223</div>
+
+                    </div>
+
+                </div>
+
+                <button class="modal-post-edit button-with-hover">Edit Post</button>
+                <button class="modal-post-delete button-with-hover">Delete Post</button>
+
+            </div>
+
+        </aside>
+
+    </div>
+</template>
 
 </body>
 
