@@ -383,7 +383,7 @@ footer {
 
 /* modal window styling */
 
-.modal {
+.modal-container {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
@@ -395,7 +395,7 @@ footer {
     background-color: rgba(0, 0, 0, 0.6); /* Black w/ opacity */
 }
 
-.modal-post {
+.modal-post.post {
     /*position: relative;*/
     background-color: #ffffff;
     margin: auto;
@@ -414,12 +414,14 @@ footer {
     justify-content: space-between;
 }
 
-.modal-post-image {
+.modal-post.post-image {
+    height: auto;
+
     flex-basis: 80%;
     display: flex;
 }
 
-.modal-post-image img {
+.modal-post img {
     max-height: 100%;
     max-width: 100%;
     object-fit: contain;
@@ -427,47 +429,54 @@ footer {
     margin: auto;
 }
 
-.modal-post-aside {
+.modal-post.post-aside {
     flex-basis: 20%;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
 }
 
-.modal-post-details {
+.modal-post.post-details {
     border: 2px solid lightgray;
     border-radius: 5px;
     padding: 10px;
     margin-top: 20px;
     margin-bottom: 20px;
+    text-align: left;
 
     display: flex;
     flex-direction: column;
     justify-content: space-around;
 }
 
-.modal-post-details h4 {
+.modal-post.post-user {
+    text-align: left;
+}
+
+.modal-post.post-details h4 {
     margin: 2px;
 }
 
-.modal-post-buttons {
+.modal-post.post-buttons {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
 }
 
-.modal-post-likes {
+.modal-post.post-likes {
+    margin-bottom: 20px;
+    border: none;
+
     display: flex;
     flex-direction: row;
     justify-content: center;
-    margin-bottom: 20px;
 }
 
-.modal-post-likes-image {
+.modal-post.post-likes-image {
     cursor: pointer;
 }
 
-.modal-post-likes-number {
+.modal-post.post-likes-number {
     display: flex;
     flex-direction: column;
     justify-content: space-around;

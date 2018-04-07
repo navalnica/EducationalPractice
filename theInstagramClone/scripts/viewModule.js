@@ -1,6 +1,7 @@
 var viewModule = function () {
 
     var hashtagBlockTemplate = null;
+    var modalPostTemplate = null;
     var filterHashtagsDiv = null;
     var modalDiv = null;
     var content = null;
@@ -17,10 +18,10 @@ var viewModule = function () {
     document.addEventListener('DOMContentLoaded', function () {
 
         filterHashtagsDiv = document.querySelector('.filter-hashtags');
-        modalDiv = document.querySelector('.modal');
-        hashtagBlockTemplate = document.getElementById('filter-hashtag-block').content;
+        hashtagBlockTemplate = document.querySelector('#filter-hashtag-block').content;
+        modalDiv = document.querySelector('.modal-container');
+        modalPostTemplate = document.querySelector('#modal-post').content;
 
-        var posts = dataModule.posts;
 
         document.querySelector('#content').addEventListener('click', function (event) {
             if (event.target.closest('.post-image')) {
@@ -32,44 +33,23 @@ var viewModule = function () {
                 var curPost = controllerModule.getPostById(id);
 
                 modalDiv.innerHTML = "";
-
-                var modalPostTemplate = document.querySelector('#modal-post').content;
                 var modalPostNode = document.importNode(modalPostTemplate, true);
 
-                modalPostNode.querySelector(".modal-post-image").querySelector('img').setAttribute('src', curPost.photoLink);
-
-                modalPostNode.querySelector(".modal-post-user").innerText = curPost.user;
-                modalPostNode.querySelector(".modal-post-date").innerText = curPost.createdAt.getDate() + '/' +
-                    (curPost.createdAt.getMonth() + 1) + "/" + curPost.createdAt.getFullYear();
-                modalPostNode.querySelector('.modal-post-description').innerText = curPost.description;
-
-                var hashtags = "";
-                curPost.hashtags.forEach(function (tag, index, arr) {
-                    hashtags += "#" + tag;
-                    if (index < arr.length - 1) {
-                        hashtags += " ";
-                    }
-                });
-                modalPostNode.querySelector(".modal-post-hashtags").innerText = hashtags;
-
-                // checks if current user has liked the post
-                var isLikedByCurrentUser = (curPost.likesFrom.indexOf(currentUser) >= 0);
-                modalPostNode.querySelector('.modal-post-likes-image').querySelector('img').setAttribute('src', (isLikedByCurrentUser) ?
-                    'icons/heart_full_32.png' : 'icons/heart_empty_32.png');
-                modalPostNode.querySelector(".modal-post-likes-number").innerText = curPost.likesFrom.length;
-
+                fillPostTemplateWithData(modalPostNode, curPost, true);
                 if (curPost.user !== currentUser) {
                     modalPostNode.querySelector('.modal-post-delete').style.display = 'none';
                     modalPostNode.querySelector('.modal-post-edit').style.display = 'none';
-                }
 
+                }
                 modalDiv.appendChild(modalPostNode);
+
                 modalDiv.style.display = 'block';
             }
         });
 
         window.addEventListener('click', function (event) {
-            if (event.target == modalDiv) {
+            if (event.target === modalDiv) {
+                // hide the modal window
                 modalDiv.style.display = 'none';
             }
         });
@@ -109,7 +89,7 @@ var viewModule = function () {
         filterHashtagsDiv.addEventListener('keyup', function (event) {
             var hashtagBlock = event.target.closest('.hashtag-block');
 
-            if (hashtagBlock.nextElementSibling == null) {
+            if (hashtagBlock.nextElementSibling === null) {
                 if (event.target.value) {
                     // the string is not empty
                     addNewHashtagBlock();
@@ -133,17 +113,44 @@ var viewModule = function () {
         });
 
         filterHashtagsDiv.addEventListener('click', function (event) {
-            if (event.target.tagName.toLowerCase() == 'button') {
+            if (event.target.tagName.toLowerCase() === 'button') {
                 var hashtagBlock = event.target.closest('.hashtag-block');
                 removeHashtagBlock(hashtagBlock);
             }
         });
 
-        // ------- commands
+        // ------- commands on document load ---------
 
         init();
 
     });
+
+    function fillPostTemplateWithData(postNode, postObject, isDescriptionPresent) {
+        postNode.querySelector(".post-image").querySelector('img').setAttribute('src', postObject.photoLink);
+
+        postNode.querySelector(".post-user").innerText = postObject.user;
+        postNode.querySelector(".post-date").innerText = postObject.createdAt.getDate() + '/' +
+            (postObject.createdAt.getMonth() + 1) + "/" + postObject.createdAt.getFullYear();
+        if (isDescriptionPresent){
+            postNode.querySelector('.post-description').innerText = postObject.description;
+        }
+
+        var hashtags = "";
+        postObject.hashtags.forEach(function (tag, index, arr) {
+            hashtags += "#" + tag;
+            if (index < arr.length - 1) {
+                hashtags += " ";
+            }
+        });
+        postNode.querySelector(".post-hashtags").innerText = hashtags;
+
+        // checks if current user has liked the post
+        var isLikedByCurrentUser = (postObject.likesFrom.indexOf(currentUser) >= 0);
+        postNode.querySelector('.post-likes-image').querySelector('img').setAttribute('src', (isLikedByCurrentUser) ?
+            'icons/heart_full_32.png' : 'icons/heart_empty_32.png');
+        postNode.querySelector(".post-likes-number").innerText = postObject.likesFrom.length;
+
+    }
 
     function setCurrentUser(username) {
         currentUser = username;
@@ -183,24 +190,7 @@ var viewModule = function () {
             var curPost = controllerModule.getPostById(posts[i].id);
 
             postNode.querySelector('.post').setAttribute('id', curPost.id);
-            postNode.querySelector(".post-user").innerText = "user: " + curPost.user;
-            postNode.querySelector(".post-date").innerText = curPost.createdAt.getDate() + '/' +
-                (curPost.createdAt.getMonth() + 1) + "/" + curPost.createdAt.getFullYear();
-            postNode.querySelector(".post-image").querySelector('img').setAttribute('src', curPost.photoLink);
-
-            // checks if current user has liked the post
-            postNode.querySelector('.post-likes-image').querySelector('img').setAttribute('src', (curPost.likesFrom.indexOf(currentUser) >= 0) ?
-                'icons/heart_full_32.png' : 'icons/heart_empty_32.png');
-            postNode.querySelector(".post-likes-number").innerText = curPost.likesFrom.length;
-
-            var hashtags = "";
-            curPost.hashtags.forEach(function (tag, index, arr) {
-                hashtags += "#" + tag;
-                if (index < arr.length - 1) {
-                    hashtags += " ";
-                }
-            });
-            postNode.querySelector(".post-hashtags").innerText = hashtags;
+            fillPostTemplateWithData(postNode, curPost, false);
 
             content.appendChild(postNode);
             i++;
@@ -220,7 +210,7 @@ var viewModule = function () {
         filterForm.elements['filter-user'].selectedIndex = 0;
 
         var filterHashtagsDiv = document.querySelector('.filter-hashtags');
-        while (filterHashtagsDiv.firstElementChild != filterHashtagsDiv.lastElementChild) {
+        while (filterHashtagsDiv.firstElementChild !== filterHashtagsDiv.lastElementChild) {
             filterHashtagsDiv.removeChild(filterHashtagsDiv.firstChild);
         }
 
