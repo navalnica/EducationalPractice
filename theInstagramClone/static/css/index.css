@@ -396,11 +396,10 @@ footer {
 }
 
 .modal-post.post {
-    /*position: relative;*/
     background-color: #ffffff;
     margin: auto;
     padding: 20px;
-    border: 1px solid #888;
+    border: 1px solid lightgray;
     width: 70%;
     height: 80%;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
@@ -485,4 +484,59 @@ footer {
 .modal-post-delete:hover {
     background-color: crimson;
     border: 2px solid crimson;
+}
+
+.modal-login-popup {
+    background-color: #ffffff;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+    width: 30%;
+    height: 30%;
+    min-height: 200px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+
+    overflow: auto; /* Enable scroll if needed */
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.modal-login-popup form {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    width: 80%;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.login-popup-labels {
+    flex-basis: 40%;
+}
+
+.login-popup-inputs {
+    flex-basis: 50%;
+}
+
+.modal-login-popup div {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.modal-login-popup div * {
+    padding-bottom: 5px;
+}
+
+.authentication-failed-span {
+    display: none;
+    padding-bottom: 5px;
+    color: red;
 }

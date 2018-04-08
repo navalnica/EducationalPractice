@@ -1,6 +1,23 @@
 var dataModule = function () {
 
-    var users = [ 'admin', 'koscia', 'pasa', 'arsieni' ];
+    var users = [
+        {
+            name: 'admin',
+            password: '123'
+        },
+        {
+            name: 'koscia',
+            password: '123'
+        },
+        {
+            name: 'pasa',
+            password: '123'
+        },
+        {
+            name: 'arsieni',
+            password: '123'
+        }
+    ];
 
     var postSchema = {
         id: {

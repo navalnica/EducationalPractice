@@ -10,10 +10,11 @@ var viewModule = function () {
     var users = dataModule.users;
     var filterConfig = null;
 
-    var currentUser = null;
+    var numberOfVisiblePosts = 0;
+    var numberOfPostsToLoad = 10;
 
     // switch type of user
-    var isCurrentUserAGuest = false;
+    var currentUserIx = -1;
 
     document.addEventListener('DOMContentLoaded', function () {
 
@@ -21,7 +22,7 @@ var viewModule = function () {
         hashtagBlockTemplate = document.querySelector('#filter-hashtag-block').content;
         modalDiv = document.querySelector('.modal-container');
         modalPostTemplate = document.querySelector('#modal-post').content;
-
+        modalLoginPopup = document.querySelector('#modal-login-popup').content;
 
         document.querySelector('#content').addEventListener('click', function (event) {
             if (event.target.closest('.post-image')) {
@@ -36,15 +37,48 @@ var viewModule = function () {
                 var modalPostNode = document.importNode(modalPostTemplate, true);
 
                 fillPostTemplateWithData(modalPostNode, curPost, true);
-                if (curPost.user !== currentUser) {
+                if (currentUserIx < 0 || curPost.user !== users[currentUserIx].name) {
                     modalPostNode.querySelector('.modal-post-delete').style.display = 'none';
                     modalPostNode.querySelector('.modal-post-edit').style.display = 'none';
-
                 }
                 modalDiv.appendChild(modalPostNode);
 
                 modalDiv.style.display = 'block';
             }
+        });
+
+        document.querySelector('#log-in').addEventListener('click', () => {
+            modalDiv.innerHTML = "";
+            var loginPopupNode = document.importNode(modalLoginPopup, true);
+            modalDiv.appendChild(loginPopupNode);
+            modalDiv.style.display = 'block';
+
+            this.querySelector('.login-form-submit').addEventListener('click', () => {
+                var form = document.querySelector('#login-form');
+                var name = form.elements['login-form-name'].value;
+                var password = form.elements['login-form-password'].value;
+
+                var ix = users.findIndex((element) => {
+                    return element.name === name && element.password === password;
+                });
+
+                if (ix > -1){
+                    setCurrentUserByIndex(ix);
+                    modalDiv.style.display = 'none';
+                }
+                else{
+                    document.querySelector('.authentication-failed-span').style.display = 'block';
+                }
+            });
+        });
+
+        document.querySelector('#log-out').addEventListener('click', () => {
+            setCurrentUserByIndex(-1);
+        });
+
+        document.querySelector('#my-photos').addEventListener('click', () => {
+            setFilterConfig({user: users[currentUserIx].name});
+            loadFirstPartOfThePosts();
         });
 
         window.addEventListener('click', function (event) {
@@ -75,15 +109,17 @@ var viewModule = function () {
                 }
             }
 
-            console.log('config of the filter:');
-            console.log(config);
             setFilterConfig(config);
-            refreshPosts();
+            loadFirstPartOfThePosts();
         });
 
         document.querySelector('.filter-clear').addEventListener('click', function () {
             clearFilterFields();
-            refreshPosts();
+            loadFirstPartOfThePosts();
+        });
+
+        document.querySelector('.load-more-button').addEventListener('click', () => {
+            loadMorePosts();
         });
 
         filterHashtagsDiv.addEventListener('keyup', function (event) {
@@ -131,7 +167,7 @@ var viewModule = function () {
         postNode.querySelector(".post-user").innerText = postObject.user;
         postNode.querySelector(".post-date").innerText = postObject.createdAt.getDate() + '/' +
             (postObject.createdAt.getMonth() + 1) + "/" + postObject.createdAt.getFullYear();
-        if (isDescriptionPresent){
+        if (isDescriptionPresent) {
             postNode.querySelector('.post-description').innerText = postObject.description;
         }
 
@@ -145,19 +181,19 @@ var viewModule = function () {
         postNode.querySelector(".post-hashtags").innerText = hashtags;
 
         // checks if current user has liked the post
-        var isLikedByCurrentUser = (postObject.likesFrom.indexOf(currentUser) >= 0);
+        var isLikedByCurrentUser = currentUserIx > -1 && (postObject.likesFrom.indexOf(users[currentUserIx].name) >= 0);
         postNode.querySelector('.post-likes-image').querySelector('img').setAttribute('src', (isLikedByCurrentUser) ?
             'icons/heart_full_32.png' : 'icons/heart_empty_32.png');
         postNode.querySelector(".post-likes-number").innerText = postObject.likesFrom.length;
 
     }
 
-    function setCurrentUser(username) {
-        currentUser = username;
+    function setCurrentUserByIndex(index) {
+        currentUserIx = index;
         var navButtons = document.querySelector('.header-nav');
 
-        if (users.indexOf(currentUser) >= 0) {
-            document.querySelector('.current-user-name').innerText = currentUser;
+        if (currentUserIx > -1){
+            document.querySelector('.current-user-name').innerText = users[currentUserIx].name;
 
             navButtons.querySelector('#my-photos').style.display = 'block';
             navButtons.querySelector('#upload-photo').style.display = 'block';
@@ -174,11 +210,21 @@ var viewModule = function () {
 
             navButtons.querySelector('#log-in').style.display = 'block';
         }
+
+        var content = document.querySelector('#content');
+        for (var i = 0; i < content.childElementCount; i++){
+            var curId = content.children[i].getAttribute('id');
+            var curPost = controllerModule.getPostById(curId);
+            var isLikedByCurrentUser = currentUserIx > -1 && (curPost.likesFrom.indexOf(users[currentUserIx].name) >= 0);
+            content.children[i].querySelector('.post-likes-image').querySelector('img').setAttribute('src', (isLikedByCurrentUser) ?
+                'icons/heart_full_32.png' : 'icons/heart_empty_32.png');
+        }
     }
 
-    function refreshPosts() {
+    function loadFirstPartOfThePosts() {
 
-        posts = controllerModule.getPaginatedPosts(0, 30, filterConfig);
+        posts = controllerModule.getPaginatedPosts(0, numberOfPostsToLoad, filterConfig);
+        numberOfVisiblePosts = posts.length;
 
         content.innerHTML = "";
         var postTemplate = document.getElementById("post-template").content;
@@ -196,7 +242,27 @@ var viewModule = function () {
             i++;
 
         }
+    }
 
+    function loadMorePosts(event) {
+        posts = controllerModule.getPaginatedPosts(numberOfVisiblePosts, numberOfPostsToLoad, filterConfig);
+        numberOfVisiblePosts += posts.length;
+
+        var postTemplate = document.getElementById("post-template").content;
+
+        var i = 0;
+        while (posts && i < posts.length) {
+
+            var postNode = document.importNode(postTemplate, true);
+            var curPost = controllerModule.getPostById(posts[i].id);
+
+            postNode.querySelector('.post').setAttribute('id', curPost.id);
+            fillPostTemplateWithData(postNode, curPost, false);
+
+            content.appendChild(postNode);
+            i++;
+
+        }
     }
 
     function setFilterConfig(config) {
@@ -227,7 +293,7 @@ var viewModule = function () {
 
         for (var i = 0; i < users.length; i++) {
             option = document.createElement("option");
-            option.text = users[i];
+            option.text = users[i].name;
             select.add(option);
         }
     }
@@ -246,84 +312,11 @@ var viewModule = function () {
 
         content = document.getElementById('content');
 
-        if (isCurrentUserAGuest) {
-            setCurrentUser('some other user');
-        }
-        else {
-            setCurrentUser('koscia');
-        }
+        setCurrentUserByIndex(1);
         setFilterConfig(null);
         fillUserSelectWithOptions();
-        refreshPosts();
+        loadFirstPartOfThePosts();
 
-    }
-
-    return {
-        refreshPosts: refreshPosts
     }
 
 }();
-
-// ------- testing functions in global scope ------------
-
-function addPhotoPost() {
-    var newPost =
-        {
-            id: '100',
-            user: 'the_new_user',
-            description: 'this is the post created in the addPhotoPost method',
-            createdAt: new Date('2018-05-22T23:00:00'),
-            photoLink: 'photos/img5.jpeg',
-            hashtags: ['car'],
-            likesFrom: ['admin'],
-            active: true
-        };
-
-    if (controllerModule.addPost(newPost)) {
-        console.log('new photo post added');
-        viewModule.refreshPosts();
-    } else {
-        console.log('adding new photo post failed');
-    }
-}
-
-function removePhotoPost(id) {
-    if (controllerModule.removePost(id)) {
-        console.log('post with id ' + id + ' successfully deleted');
-        viewModule.refreshPosts();
-    }
-    else {
-        console.log('deletion failed. maybe wrong id passed to the method');
-    }
-}
-
-function editPhotoPost(id, toEdit) {
-    /* notice that only following fields are editable:
-        description
-        photoLink
-        hashtags
-        likesFrom
-     */
-
-    if (controllerModule.editPost(id, toEdit)) {
-        console.log('post with id ' + id + ' successfully edited');
-        viewModule.refreshPosts();
-    }
-    else {
-        console.log('editing failed');
-    }
-
-}
-
-function test() {
-    editPhotoPost('18', {
-        description: 'this is the new description. the post was edited. ' +
-        'likesFrom array alse edited', likesFrom: ['koscia']
-    });
-
-    for (var i = 1; i < 15; i++) {
-        removePhotoPost('' + i);
-    }
-
-    addPhotoPost();
-}

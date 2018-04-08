@@ -197,6 +197,32 @@
     </div>
 </template>
 
+<template id="modal-login-popup">
+    <div class="modal-login-popup">
+
+        <h3>Fill in the data to Log In</h3>
+
+        <span class="authentication-failed-span">Authentication Failed</span>
+
+        <form name="login-form" id="login-form" action="#">
+
+            <div class="login-popup-labels">
+                <label for="login-form-name">User Name</label>
+                <label for="login-form-password">User Password</label>
+            </div>
+
+            <div class="login-popup-inputs">
+                <input type="text" name="login-form-name" id="login-form-name">
+                <input type="password" name="login-form-password" id="login-form-password">
+            </div>
+
+        </form>
+
+        <button type="button" class="login-form-submit button-with-hover">Log In</button>
+
+    </div>
+</template>
+
 </body>
 
 </html>
