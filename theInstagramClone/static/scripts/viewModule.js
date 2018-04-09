@@ -2,7 +2,10 @@ var viewModule = function () {
 
     var hashtagBlockTemplate = null;
     var modalPostTemplate = null;
+    var modalEditingTemplate = null;
+    var modalLoginPopup = null;
     var filterHashtagsDiv = null;
+    var editingHashtagsDiv = null;
     var modalDiv = null;
     var content = null;
 
@@ -22,6 +25,7 @@ var viewModule = function () {
         hashtagBlockTemplate = document.querySelector('#filter-hashtag-block').content;
         modalDiv = document.querySelector('.modal-container');
         modalPostTemplate = document.querySelector('#modal-post').content;
+        modalEditingTemplate = document.querySelector('#modal-editing').content;
         modalLoginPopup = document.querySelector('#modal-login-popup').content;
 
         document.querySelector('#content').addEventListener('click', function (event) {
@@ -36,14 +40,44 @@ var viewModule = function () {
                 modalDiv.innerHTML = "";
                 var modalPostNode = document.importNode(modalPostTemplate, true);
 
-                fillPostTemplateWithData(modalPostNode, curPost, true);
+                fillPostTemplateWithData(modalPostNode, curPost);
                 if (currentUserIx < 0 || curPost.user !== users[currentUserIx].name) {
                     modalPostNode.querySelector('.modal-post-delete').style.display = 'none';
                     modalPostNode.querySelector('.modal-post-edit').style.display = 'none';
                 }
-                modalDiv.appendChild(modalPostNode);
 
                 modalDiv.style.display = 'block';
+
+                modalPostNode.querySelector('.modal-post-edit').addEventListener('click', (event) => {
+                    modalDiv.innerHTML = "";
+                    var modalEditingNode = document.importNode(modalEditingTemplate, true);
+
+                    editingHashtagsDiv  = modalEditingNode.querySelector('.editing-hashtags');
+                    editingHashtagsDiv.addEventListener('keyup', onEditingHashtagInputKeyUp);
+                    editingHashtagsDiv.addEventListener('focusout', onEditingHashtagInputFocusOut);
+                    editingHashtagsDiv.addEventListener('click', onEditingHashtagRemoveButtonClick);
+
+                    fillPostTemplateWithData(modalEditingNode, curPost);
+
+                    modalEditingNode.querySelector('.modal-editing-save').addEventListener('click', ()=>{
+
+                        modalDiv.style.display = 'none';
+                        loadFirstPartOfThePosts();
+                    });
+
+                    modalEditingNode.querySelector('.modal-editing-discard').addEventListener('click', ()=>{
+                        modalDiv.style.display = 'none';
+                    });
+
+                    modalDiv.appendChild(modalEditingNode);
+                });
+
+                modalPostNode.querySelector('.modal-post-delete', (event) => {
+
+                });
+
+                modalDiv.appendChild(modalPostNode);
+
             }
         });
 
@@ -62,11 +96,11 @@ var viewModule = function () {
                     return element.name === name && element.password === password;
                 });
 
-                if (ix > -1){
+                if (ix > -1) {
                     setCurrentUserByIndex(ix);
                     modalDiv.style.display = 'none';
                 }
-                else{
+                else {
                     document.querySelector('.authentication-failed-span').style.display = 'block';
                 }
             });
@@ -122,38 +156,11 @@ var viewModule = function () {
             loadMorePosts();
         });
 
-        filterHashtagsDiv.addEventListener('keyup', function (event) {
-            var hashtagBlock = event.target.closest('.hashtag-block');
+        filterHashtagsDiv.addEventListener('keyup', onFilterHashtagInputKeyUp);
 
-            if (hashtagBlock.nextElementSibling === null) {
-                if (event.target.value) {
-                    // the string is not empty
-                    addNewHashtagBlock();
-                    event.target.parentElement.querySelector('.hashtag-remove-button').style.display = 'block';
-                }
-            }
-        });
+        filterHashtagsDiv.addEventListener('focusout', onFilterHashtagInputFocusOut);
 
-        filterHashtagsDiv.addEventListener('focusout', function (event) {
-            if (event.target.tagName.toLowerCase() === 'input') {
-                if (!event.target.value) {
-                    // the string in hashtag input is empty. should remove that block
-                    var hashtagBlock = event.target.closest('.hashtag-block');
-
-                    if (filterHashtagsDiv.childElementCount > 1 && hashtagBlock.nextElementSibling != null) {
-                        // if current hashtag block is not the only one and not the last one
-                        removeHashtagBlock(hashtagBlock);
-                    }
-                }
-            }
-        });
-
-        filterHashtagsDiv.addEventListener('click', function (event) {
-            if (event.target.tagName.toLowerCase() === 'button') {
-                var hashtagBlock = event.target.closest('.hashtag-block');
-                removeHashtagBlock(hashtagBlock);
-            }
-        });
+        filterHashtagsDiv.addEventListener('click', onFilterHashtagRemoveButtonClick);
 
         // ------- commands on document load ---------
 
@@ -161,38 +168,61 @@ var viewModule = function () {
 
     });
 
-    function fillPostTemplateWithData(postNode, postObject, isDescriptionPresent) {
+    function fillPostTemplateWithData(postNode, postObject) {
         postNode.querySelector(".post-image").querySelector('img').setAttribute('src', postObject.photoLink);
 
         postNode.querySelector(".post-user").innerText = postObject.user;
         postNode.querySelector(".post-date").innerText = postObject.createdAt.getDate() + '/' +
             (postObject.createdAt.getMonth() + 1) + "/" + postObject.createdAt.getFullYear();
-        if (isDescriptionPresent) {
+
+        var descriptionDiv = postNode.querySelector('.post-description');
+        if (descriptionDiv) {
             postNode.querySelector('.post-description').innerText = postObject.description;
         }
 
-        var hashtags = "";
-        postObject.hashtags.forEach(function (tag, index, arr) {
-            hashtags += "#" + tag;
-            if (index < arr.length - 1) {
-                hashtags += " ";
-            }
-        });
-        postNode.querySelector(".post-hashtags").innerText = hashtags;
+        var hashtagsDivNode = postNode.querySelector(".post-hashtags");
+        if (hashtagsDivNode) {
+            var hashtags = "";
+            postObject.hashtags.forEach(function (tag, index, arr) {
+                hashtags += "#" + tag;
+                if (index < arr.length - 1) {
+                    hashtags += " ";
+                }
+            });
+            hashtagsDivNode.innerText = hashtags;
+        }
 
-        // checks if current user has liked the post
-        var isLikedByCurrentUser = currentUserIx > -1 && (postObject.likesFrom.indexOf(users[currentUserIx].name) >= 0);
-        postNode.querySelector('.post-likes-image').querySelector('img').setAttribute('src', (isLikedByCurrentUser) ?
-            'icons/heart_full_32.png' : 'icons/heart_empty_32.png');
-        postNode.querySelector(".post-likes-number").innerText = postObject.likesFrom.length;
 
+        var likesDiv = postNode.querySelector('.post-likes');
+        if (likesDiv) {
+            // checks if current user has liked the post
+            var isLikedByCurrentUser = currentUserIx > -1 && (postObject.likesFrom.indexOf(users[currentUserIx].name) >= 0);
+            likesDiv.querySelector('img').setAttribute('src', (isLikedByCurrentUser) ?
+                'icons/heart_full_32.png' : 'icons/heart_empty_32.png');
+            likesDiv.querySelector('span').innerText = postObject.likesFrom.length;
+        }
+
+        // for editing post
+        var descriptionInput = postNode.querySelector('#editing-description');
+        if (descriptionInput) {
+            descriptionInput.value = postObject.description;
+        }
+
+        var editingHashtags = postNode.querySelector('.editing-hashtags');
+        if (editingHashtags) {
+            postObject.hashtags.forEach(function (tag, index, arr) {
+                editingHashtags.lastElementChild.querySelector('.hashtag-input').value = tag;
+                editingHashtags.lastElementChild.querySelector('.hashtag-remove-button').style.display = 'block';
+                addNewHashtagBlock(editingHashtagsDiv);
+            });
+        }
     }
 
     function setCurrentUserByIndex(index) {
         currentUserIx = index;
         var navButtons = document.querySelector('.header-nav');
 
-        if (currentUserIx > -1){
+        if (currentUserIx > -1) {
             document.querySelector('.current-user-name').innerText = users[currentUserIx].name;
 
             navButtons.querySelector('#my-photos').style.display = 'block';
@@ -212,7 +242,7 @@ var viewModule = function () {
         }
 
         var content = document.querySelector('#content');
-        for (var i = 0; i < content.childElementCount; i++){
+        for (var i = 0; i < content.childElementCount; i++) {
             var curId = content.children[i].getAttribute('id');
             var curPost = controllerModule.getPostById(curId);
             var isLikedByCurrentUser = currentUserIx > -1 && (curPost.likesFrom.indexOf(users[currentUserIx].name) >= 0);
@@ -236,7 +266,7 @@ var viewModule = function () {
             var curPost = controllerModule.getPostById(posts[i].id);
 
             postNode.querySelector('.post').setAttribute('id', curPost.id);
-            fillPostTemplateWithData(postNode, curPost, false);
+            fillPostTemplateWithData(postNode, curPost);
 
             content.appendChild(postNode);
             i++;
@@ -257,7 +287,7 @@ var viewModule = function () {
             var curPost = controllerModule.getPostById(posts[i].id);
 
             postNode.querySelector('.post').setAttribute('id', curPost.id);
-            fillPostTemplateWithData(postNode, curPost, false);
+            fillPostTemplateWithData(postNode, curPost);
 
             content.appendChild(postNode);
             i++;
@@ -298,14 +328,79 @@ var viewModule = function () {
         }
     }
 
-    function addNewHashtagBlock() {
-        var newHashtagBlock = document.importNode(hashtagBlockTemplate, true);
-        newHashtagBlock.querySelector('.hashtag-remove-button').style.display = 'none';
-        filterHashtagsDiv.appendChild(newHashtagBlock);
+    // filter hashtags event listeners
+
+    function onFilterHashtagInputKeyUp(event) {
+        var hashtagBlock = event.target.closest('.hashtag-block');
+
+        if (hashtagBlock.nextElementSibling === null) {
+            if (event.target.value) {
+                // the string is not empty
+                addNewHashtagBlock(filterHashtagsDiv);
+                event.target.parentElement.querySelector('.hashtag-remove-button').style.display = 'block';
+            }
+        }
     }
 
-    function removeHashtagBlock(hashtagBlock) {
-        filterHashtagsDiv.removeChild(hashtagBlock);
+    function onFilterHashtagInputFocusOut(event) {
+        if (event.target.tagName.toLowerCase() === 'input') {
+            if (!event.target.value) {
+                // the string in hashtag input is empty. should remove that block
+                var hashtagBlock = event.target.closest('.hashtag-block');
+                removeHashtagBlock(hashtagBlock, filterHashtagsDiv);
+            }
+        }
+    }
+
+    function onFilterHashtagRemoveButtonClick(event) {
+        if (event.target.tagName.toLowerCase() === 'button') {
+            var hashtagBlock = event.target.closest('.hashtag-block');
+            removeHashtagBlock(hashtagBlock, filterHashtagsDiv);
+        }
+    }
+
+    // editing post modal window hashtags event listeners
+
+    function onEditingHashtagInputKeyUp(event) {
+        var hashtagBlock = event.target.closest('.hashtag-block');
+
+        if (hashtagBlock.nextElementSibling === null) {
+            if (event.target.value) {
+                // the string is not empty
+                addNewHashtagBlock(editingHashtagsDiv);
+                event.target.parentElement.querySelector('.hashtag-remove-button').style.display = 'block';
+            }
+        }
+    }
+
+    function onEditingHashtagInputFocusOut(event) {
+        if (event.target.tagName.toLowerCase() === 'input') {
+            if (!event.target.value) {
+                // the string in hashtag input is empty. should remove that block
+                var hashtagBlock = event.target.closest('.hashtag-block');
+                removeHashtagBlock(hashtagBlock, editingHashtagsDiv);
+            }
+        }
+    }
+
+    function onEditingHashtagRemoveButtonClick(event) {
+        if (event.target.tagName.toLowerCase() === 'button') {
+            var hashtagBlock = event.target.closest('.hashtag-block');
+            removeHashtagBlock(hashtagBlock, editingHashtagsDiv);
+        }
+    }
+
+    function addNewHashtagBlock(curHashtagDiv) {
+        var newHashtagBlock = document.importNode(hashtagBlockTemplate, true);
+        newHashtagBlock.querySelector('.hashtag-remove-button').style.display = 'none';
+        curHashtagDiv.appendChild(newHashtagBlock);
+    }
+
+    function removeHashtagBlock(hashtagBlock, curHashtagDiv) {
+        if (curHashtagDiv.childElementCount > 1 ) {
+            // if current hashtag block is not the only one and not the last one
+            curHashtagDiv.removeChild(hashtagBlock);
+        }
     }
 
     function init() {

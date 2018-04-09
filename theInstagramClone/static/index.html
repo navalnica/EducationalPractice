@@ -130,7 +130,7 @@
                 <div class="post-likes-image">
                     <img src="icons/heart_full_32.png" alt="likes: ">
                 </div>
-                <div class="post-likes-number">223</div>
+                <span class="post-likes-number">223</span>
             </div>
             <div class="post-hashtags">#rest #fishing #nature</div>
         </div>
@@ -181,7 +181,7 @@
                     <div class="modal-post post-likes">
 
                         <div class="modal-post post-likes-image"><img src="" alt="likes: "></div>
-                        <div class="modal-post post-likes-number">223</div>
+                        <span class="modal-post post-likes-number">223</span>
 
                     </div>
 
@@ -189,6 +189,63 @@
 
                 <button class="modal-post-edit button-with-hover">Edit Post</button>
                 <button class="modal-post-delete button-with-hover">Delete Post</button>
+
+            </div>
+
+        </aside>
+
+    </div>
+</template>
+
+<template id="modal-editing">
+    <div class="modal-post post">
+
+        <div class="modal-post post-image">
+            <img alt="modal post window image" src="photos/img3.jpeg">
+        </div>
+
+        <aside class="modal-post post-aside">
+
+            <form name="editing-form" id="editing-form" action="#"
+                  class="modal-post post-details">
+
+                <h4>User:</h4>
+                <div class="modal-post post-user"></div>
+
+                <h4>Created At:</h4>
+                <div class="modal-post post-date"></div>
+
+
+                <label for="editing-description">Description:</label>
+                <textarea name="description" id="editing-description"></textarea>
+
+                <div class="editing-hashtags-block">
+
+                    <p>Type some hashtags</p>
+
+                    <div class="editing-hashtags">
+
+                        <div class="hashtag-block">
+                            <input type="text" class="hashtag-input-static" value="#" disabled>
+
+                            <div class="hashtag-subdib">
+                                <input type="text" name="filter-hashtag"
+                                       placeholder="add hashtag" class="hashtag-input">
+
+                                <button type="button" class="hashtag-remove-button">-</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+            <div class="modal-post post-buttons">
+
+                <button class="modal-editing-save button-with-hover">Save</button>
+                <button class="modal-editing-discard button-with-hover">Discard</button>
 
             </div>
 

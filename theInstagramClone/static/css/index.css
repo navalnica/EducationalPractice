@@ -75,6 +75,7 @@ header {
 
 .button-with-hover {
     min-width: 130px;
+    min-height: 40px;
 
     background-color: #FFFFFF;
     border: 2px solid lightseagreen;
@@ -182,7 +183,6 @@ footer {
     border: 2px solid #cf3e12;
     border-radius: 5px;
 
-    font-size: 1em;
     color: #cf3e12;
     text-align: center;
 
@@ -442,6 +442,7 @@ footer {
     margin-top: 20px;
     margin-bottom: 20px;
     text-align: left;
+    overflow: auto;
 
     display: flex;
     flex-direction: column;
@@ -463,22 +464,12 @@ footer {
 }
 
 .modal-post.post-likes {
-    margin-bottom: 20px;
     border: none;
-
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
+    min-height: 30px;
 }
 
 .modal-post.post-likes-image {
     cursor: pointer;
-}
-
-.modal-post.post-likes-number {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
 }
 
 .modal-post-delete:hover {
@@ -539,4 +530,15 @@ footer {
     display: none;
     padding-bottom: 5px;
     color: red;
+}
+
+textarea {
+    height: 100px;
+    box-sizing: border-box;
+    border: 2px solid lightgray;
+    border-radius: 4px;
+    /*background-color: #f8f8f8;*/
+    resize: none;
+    font-family: Helvetica, sans-serif;
+    font-size: 18px;
 }
