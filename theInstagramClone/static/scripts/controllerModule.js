@@ -4,7 +4,22 @@ var controllerModule = function () {
 
     var posts = dataModule.posts;
 
+    var nextId = '0';
+
+    (function getNextId(){
+        posts.forEach((item)=>{
+            if (parseInt(item.id) > parseInt(nextId)){
+                nextId = item.id;
+            }
+        });
+        incrementNextId();
+    })();
+
     var postSchema = dataModule.postSchema;
+
+    function incrementNextId(){
+        nextId = (parseInt(nextId) + 1).toString();
+    }
 
     var getPaginatedPosts = function (skip, length, filterConfig) {
 
@@ -112,6 +127,11 @@ var controllerModule = function () {
     }
 
     function addPost(newPost) {
+        newPost.id = nextId;
+        incrementNextId();
+        newPost.likesFrom = [];
+        newPost.active = true;
+
         if (!validatePost(newPost))
             return false;
 
@@ -192,7 +212,6 @@ var controllerModule = function () {
         getPaginatedPosts: getPaginatedPosts,
         getPostById: getPostById,
         addPost: addPost,
-        validatePost: validatePost,
         editPost: editPost,
         removePost: removePost,
     }
