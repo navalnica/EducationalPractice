@@ -1,6 +1,6 @@
-var dataModule = function () {
+let dataModule = function () {
 
-    var users = [
+    let users = [
         {
             name: 'admin',
             password: '123'
@@ -19,7 +19,7 @@ var dataModule = function () {
         }
     ];
 
-    var postSchema = {
+    let postSchema = {
         id: {
             constructorName: 'String',
             minLength: 1,
@@ -52,7 +52,7 @@ var dataModule = function () {
         active: {constructorName: 'Boolean'}
     };
 
-    var posts = [
+    let posts = [
 
         {
             id: '1',
