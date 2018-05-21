@@ -1,17 +1,39 @@
-var controllerModule = function () {
+let controllerModule = function () {
 
     'use strict';
 
-    var posts = dataModule.posts;
+    let posts = dataModule.posts;
 
-    var postSchema = dataModule.postSchema;
+    function getPosts(){
+        return posts;
+    }
 
-    var getPaginatedPosts = function (skip, length, filterConfig) {
+    function setPosts(newPosts) {
+        if (!newPosts){
+            return;
+        }
+        let notValid = newPosts.filter((item) => {
+            return !validatePost(item);
+        });
+        if (notValid.length > 0) {
+            alert('there are some not valid posts!');
+            return;
+        }
+        posts = newPosts;
+    }
+
+    function getNextId(){
+        return (posts.length + 1).toString();
+    }
+
+    let postSchema = dataModule.postSchema;
+
+    let getPaginatedPosts = function (skip, length, filterConfig) {
 
         skip = skip || 0;
         length = length || 10;
 
-        var tmpPosts = posts.filter(function (item) {
+        let tmpPosts = posts.filter(function (item) {
             return item.active && validatePost(item);
         });
 
@@ -82,28 +104,30 @@ var controllerModule = function () {
             return false;
         }
 
-        for (var key in postSchema) {
-            if (p[key] === undefined || p[key] === null) {
-                return false;
-            }
-            if (postSchema[key].constructorName !== p[key].constructor.name) {
-                return false;
-            }
-            if (postSchema[key].constructorName === 'String') {
-                if (p[key].length < postSchema[key].minLength ||
-                    p[key].length > postSchema[key].maxLength) {
+        for (let key in postSchema) {
+            if (postSchema.hasOwnProperty(key)){
+                if (p[key] === undefined || p[key] === null) {
                     return false;
                 }
-            }
-            if (postSchema[key].constructorName === 'Array') {
-                var b = true;
-                p[key].forEach(function (item) {
-                    if (item.constructor.name !== postSchema[key].elementsConstructorName) {
-                        b = false;
-                    }
-                });
-                if (!b) {
+                if (postSchema[key].constructorName !== p[key].constructor.name) {
                     return false;
+                }
+                if (postSchema[key].constructorName === 'String') {
+                    if (p[key].length < postSchema[key].minLength ||
+                        p[key].length > postSchema[key].maxLength) {
+                        return false;
+                    }
+                }
+                if (postSchema[key].constructorName === 'Array') {
+                    let b = true;
+                    p[key].forEach(function (item) {
+                        if (item.constructor.name !== postSchema[key].elementsConstructorName) {
+                            b = false;
+                        }
+                    });
+                    if (!b) {
+                        return false;
+                    }
                 }
             }
         }
@@ -112,28 +136,27 @@ var controllerModule = function () {
     }
 
     function addPost(newPost) {
+        newPost.id = getNextId();
+        newPost.likesFrom = [];
+        newPost.active = true;
+
         if (!validatePost(newPost))
             return false;
-
-        var prevPost = getPostById(newPost.id);
-        if (prevPost) {
-            return false;
-        }
 
         posts.push(newPost);
         return true;
     }
 
     function editPost(id, input) {
-        var oldPost = getPostById(id);
+        let oldPost = getPostById(id);
         if (oldPost === undefined) {
             return false;
         }
 
         // creating a copy of the oldPost object
-        var editedPost = Object.assign({}, oldPost);
+        let editedPost = Object.assign({}, oldPost);
 
-        for (var prop in input) {
+        for (let prop in input) {
             if (input.hasOwnProperty(prop)) {
                 if (input[prop] === null || input[prop] === undefined) {
                     return false;
@@ -164,7 +187,7 @@ var controllerModule = function () {
             return false;
 
         // replace old post with the new one
-        var postId = posts.findIndex(function (item) {
+        let postId = posts.findIndex(function (item) {
             return item.id === id;
         });
         if (postId === -1)
@@ -177,24 +200,25 @@ var controllerModule = function () {
     // we do not remove posts permanently
     // but only set 'active' field to falsef
     function removePost(id) {
-        var postToRemove = getPostById(id);
+        let postToRemove = getPostById(id);
         if (postToRemove === undefined) {
             return false;
         }
-        if (postToRemove.active == false){
+        if (postToRemove.active === false) {
             return false;
         }
         postToRemove.active = false;
         return true;
     }
-
+    
     return {
         getPaginatedPosts: getPaginatedPosts,
         getPostById: getPostById,
         addPost: addPost,
-        validatePost: validatePost,
         editPost: editPost,
         removePost: removePost,
+        getPosts: getPosts,
+        setPosts: setPosts
     }
 
 }();

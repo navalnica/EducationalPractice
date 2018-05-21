@@ -77,7 +77,7 @@
                             <input type="text" class="hashtag-input-static" value="#" disabled>
 
                             <div class="hashtag-subdib">
-                                <input type="text" name="filter-hashtag"
+                                <input type="text" name="hashtag"
                                        placeholder="add hashtag" class="hashtag-input">
 
                                 <button type="button" class="hashtag-remove-button">-</button>
@@ -128,9 +128,9 @@
         <div class="post-details">
             <div class="post-likes">
                 <div class="post-likes-image">
-                    <img src="icons/heart_full_32.png" alt="likes: ">
+                    <img src="icons/heart_full_32.png" class="likes-image" alt="likes: ">
                 </div>
-                <div class="post-likes-number">223</div>
+                <span class="post-likes-number">223</span>
             </div>
             <div class="post-hashtags">#rest #fishing #nature</div>
         </div>
@@ -142,7 +142,7 @@
         <input type="text" class="hashtag-input-static" value="#" disabled>
 
         <div class="hashtag-subdib">
-            <input type="text" name="filter-hashtag"
+            <input type="text" name="hashtag"
                    placeholder="add hashtag" class="hashtag-input">
 
             <button type="button" class="hashtag-remove-button">-</button>
@@ -154,7 +154,7 @@
     <div class="modal-post post">
 
         <div class="modal-post post-image">
-            <img alt="modal post window image" src="photos/img3.jpeg">
+            <img alt="image preview" src="photos/img3.jpeg">
         </div>
 
         <aside class="modal-post post-aside">
@@ -180,19 +180,173 @@
 
                     <div class="modal-post post-likes">
 
-                        <div class="modal-post post-likes-image"><img src="" alt="likes: "></div>
-                        <div class="modal-post post-likes-number">223</div>
+                        <div class="modal-post post-likes-image">
+                            <img src="" alt="likes: " class="likes-image">
+                        </div>
+                        <span class="modal-post post-likes-number">223</span>
 
                     </div>
 
                 </div>
 
-                <button class="modal-post-edit button-with-hover">Edit Post</button>
-                <button class="modal-post-delete button-with-hover">Delete Post</button>
+                <button class="edit button-with-hover">Edit Post</button>
+                <button class="delete button-with-hover">Delete Post</button>
 
             </div>
 
         </aside>
+
+    </div>
+</template>
+
+<template id="modal-editing">
+    <div class="modal-post post">
+
+        <div class="modal-post post-image">
+            <img alt="image preview" class="image-preview" src="photos/img3.jpeg">
+        </div>
+
+        <aside class="modal-post post-aside">
+
+            <span class="error-span"></span>
+
+            <form name="editing-form" id="editing-form" action="#"
+                  class="modal-post post-details">
+
+                <h4>User:</h4>
+                <div class="modal-post post-user"></div>
+
+                <h4>Created At:</h4>
+                <div class="modal-post post-date"></div>
+
+
+                <label for="editing-description">Description:</label>
+                <textarea name="description" id="editing-description"></textarea>
+
+                <label for="editing-image-file">Change Photo</label>
+                <input type="file" id="editing-image-file" name="image-file"
+                       accept=".jpg, .jpeg, .png">
+
+                <div class="editing-hashtags-block">
+
+                    <p>Type some hashtags</p>
+
+                    <div class="editing-hashtags">
+
+                        <div class="hashtag-block">
+                            <input type="text" class="hashtag-input-static" value="#" disabled>
+
+                            <div class="hashtag-subdib">
+                                <input type="text" name="hashtag"
+                                       placeholder="add hashtag" class="hashtag-input">
+
+                                <button type="button" class="hashtag-remove-button">-</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+            <div class="modal-post post-buttons">
+
+                <button class="save button-with-hover">Save</button>
+                <button class="discard button-with-hover">Discard</button>
+
+            </div>
+
+        </aside>
+
+    </div>
+</template>
+
+<template id="modal-creating">
+    <div class="modal-post post">
+
+        <div class="modal-post post-image">
+            <img alt="image preview" class="image-preview" src="">
+        </div>
+
+        <aside class="modal-post post-aside">
+
+            <span class="error-span"></span>
+
+            <form name="creating-form" id="creating-form" action="#"
+                  class="modal-post post-details">
+
+                <h4>User:</h4>
+                <div class="modal-post post-user"></div>
+
+                <h4>Created At:</h4>
+                <div class="modal-post post-date"></div>
+
+
+                <label for="creating-description">Description:</label>
+                <textarea name="description" id="creating-description"></textarea>
+
+                <label for="creating-image-file">Change Photo</label>
+                <input type="file" id="creating-image-file" name="image-file"
+                       accept=".jpg, .jpeg, .png">
+
+                <div class="creating-hashtags-block">
+
+                    <p>Type some hashtags</p>
+
+                    <div class="creating-hashtags">
+
+                        <div class="hashtag-block">
+                            <input type="text" class="hashtag-input-static" value="#" disabled>
+
+                            <div class="hashtag-subdib">
+                                <input type="text" name="hashtag"
+                                       placeholder="add hashtag" class="hashtag-input">
+
+                                <button type="button" class="hashtag-remove-button">-</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+            <div class="modal-post post-buttons">
+
+                <button class="save button-with-hover" disabled>Save</button>
+                <button class="discard button-with-hover">Discard</button>
+
+            </div>
+
+        </aside>
+
+    </div>
+</template>
+
+<template id="modal-login-popup">
+    <div class="modal-login-popup">
+
+        <h3>Fill in the data to Log In</h3>
+
+        <span class="authentication-failed-span">Authentication Failed</span>
+
+        <form name="login-form" id="login-form" action="#">
+
+            <div class="login-popup-labels">
+                <label for="login-form-name">User Name</label>
+                <label for="login-form-password">User Password</label>
+            </div>
+
+            <div class="login-popup-inputs">
+                <input type="text" name="login-form-name" id="login-form-name">
+                <input type="password" name="login-form-password" id="login-form-password">
+            </div>
+
+        </form>
+
+        <button type="button" class="login-form-submit button-with-hover">Log In</button>
 
     </div>
 </template>
