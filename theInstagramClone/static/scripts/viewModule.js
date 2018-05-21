@@ -37,11 +37,11 @@ let viewModule = function () {
             let curPost;
             let currentUserIx;
 
-            if (event.target.closest('.post-likes')){
+            if (event.target.closest('.post-likes')) {
 
-                 id = event.target.closest('.post').getAttribute('id');
-                 curPost = controllerModule.getPostById(id);
-                 currentUserIx = localStorage.getItem('currentUserIx') || -1;
+                id = event.target.closest('.post').getAttribute('id');
+                curPost = controllerModule.getPostById(id);
+                currentUserIx = localStorage.getItem('currentUserIx') || -1;
 
                 if (currentUserIx > -1) {
                     let userName = users[currentUserIx].name;
@@ -51,7 +51,7 @@ let viewModule = function () {
                         curPost.likesFrom.push(userName);
                         setPostLikeStatus(event.target.closest('.post-likes'), true);
                     }
-                    else{
+                    else {
                         curPost.likesFrom.splice(indexInLikesArray, 1);
                         setPostLikeStatus(event.target.closest('.post-likes'), false);
                     }
@@ -151,8 +151,8 @@ let viewModule = function () {
                         let indexInLikesArray = curPost.likesFrom.indexOf(userName);
 
                         let postInFeed;
-                        for (let i = 0; i < content.childElementCount; i++){
-                            if (content.children[i].id === id){
+                        for (let i = 0; i < content.childElementCount; i++) {
+                            if (content.children[i].id === id) {
                                 postInFeed = content.children[i];
                                 break;
                             }
@@ -163,7 +163,7 @@ let viewModule = function () {
                             setPostLikeStatus(event.currentTarget, true);
                             setPostLikeStatus(postInFeed, true);
                         }
-                        else{
+                        else {
                             curPost.likesFrom.splice(indexInLikesArray, 1);
                             setPostLikeStatus(event.currentTarget, false);
                             setPostLikeStatus(postInFeed, false);
@@ -313,6 +313,35 @@ let viewModule = function () {
 
             setFilterConfig(config);
             loadFirstPartOfThePosts();
+
+            // TODO remove
+
+            // const xhr = new XMLHttpRequest();
+            // xhr.open('GET', 'posts.json');
+            // xhr.onload = function () {
+            //     if (this.status === 200) {
+            //         const posts = JSON.parse(this.responseText);
+            //         console.log('posts successfully parsed!');
+            //         console.log(posts);
+            //     }
+            //     else {
+            //         console.log('error occured while loading json file');
+            //     }
+            // }
+            //
+            // xhr.send();
+
+            // end of remove block
+
+            // creating xml http request
+            makeRequest('GET', '/posts/get', config)
+                .then(function (datums) {
+                    console.log('all is ok. xhr processed. result:');
+                    console.log(datums);
+                })
+                .catch(function (err) {
+                    console.error('Augh, there was an error!', err.statusText);
+                });
         });
 
         document.querySelector('.filter-clear').addEventListener('click', function () {
@@ -335,6 +364,43 @@ let viewModule = function () {
         init();
 
     });
+
+    /* -------------- server communication methods ------------------- */
+    function makeRequest(method, url, params) {
+
+        return new Promise(function (resolve, reject) {
+
+            console.log('params:');
+            console.log(params);
+
+            const xhr = new XMLHttpRequest();
+
+            xhr.open(method, url);
+            xhr.setRequestHeader('Content-type', 'application/json');
+
+            xhr.onload = function () {
+                if (this.status >= 200 && this.status < 300) {
+                    resolve(xhr.response);
+                } else {
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                }
+            };
+
+            xhr.onerror = function () {
+                reject({
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            };
+
+            xhr.send(JSON.stringify(params));
+        });
+    }
+
+    /* -------------- server communication methods ------------------- */
 
     function fillPostTemplateWithData(postNode, postObject) {
         postNode.querySelector(".post-image").querySelector('img').setAttribute('src', postObject.photoLink);
@@ -586,14 +652,14 @@ let viewModule = function () {
     function setPostLikeStatus(postLikesDiv, isSet) {
         let img = postLikesDiv.querySelector('.likes-image');
         let likesSpan = postLikesDiv.querySelector('.post-likes-number');
-        if (isSet){
+        if (isSet) {
             img.setAttribute('src', 'icons/heart_full_32.png');
             likesSpan.innerText = (parseInt(likesSpan.innerText) + 1).toString();
         }
-        else{
+        else {
             img.setAttribute('src', 'icons/heart_empty_32.png');
             let prevCount = parseInt(likesSpan.innerText);
-            if (prevCount > 1){
+            if (prevCount > 1) {
                 likesSpan.innerText = (prevCount - 1).toString();
             }
         }
