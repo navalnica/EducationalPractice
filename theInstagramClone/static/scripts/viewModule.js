@@ -61,10 +61,14 @@ let viewModule = function () {
                 id = event.target.closest('.post').getAttribute('id');
                 currentUserIx = localStorage.getItem('currentUserIx') || -1;
 
-                // make xhr to the server
-                curPost = await requestSinglePostFromServerAsynchronously(id);
-
-                debugger;
+                // make xhr to the server and pause function execution
+                try{
+                    curPost = await requestSinglePostFromServerAsynchronously(id);
+                }
+                catch(error){
+                    console.error('error occured while requesting for single post data');
+                    console.error(`error: ${error}`);
+                }
 
                 modalDiv.innerHTML = "";
                 let modalPostNode = document.importNode(modalPostTemplate, true);
@@ -367,7 +371,7 @@ let viewModule = function () {
     });
 
     /* -------------- server communication methods ------------------- */
-    function makeAsyncXmlHttpRequest(method, url, params) {
+    async function makeAsyncXmlHttpRequest(method, url, params) {
 
         return new Promise(function (resolve, reject) {
             const xhr = new XMLHttpRequest();
@@ -397,12 +401,12 @@ let viewModule = function () {
         });
     }
 
-    function correctCreatedAtFieldInPostAfterJsonParse(post){
+    function correctCreatedAtFieldInPostAfterJsonParse(post) {
         const dateString = post.createdAt;
         post.createdAt = new Date(dateString);
     }
 
-    function requestAndLoadFilteredPostsFromServer(){
+    function requestAndLoadFilteredPostsFromServer() {
         const xhrParams = {
             filterConfig: filterConfig,
             numOfPostsToSkip: numberOfVisiblePosts,
@@ -412,7 +416,7 @@ let viewModule = function () {
             .then(function (response) {
                 console.log('xhr to /getFilteredPosts processed successfully. updating posts container');
                 let filteredPostsCollection = JSON.parse(response);
-                filteredPostsCollection.forEach((post)=>correctCreatedAtFieldInPostAfterJsonParse(post));
+                filteredPostsCollection.forEach((post) => correctCreatedAtFieldInPostAfterJsonParse(post));
                 loadPostsFromServerResponse(filteredPostsCollection);
             })
             .catch(function (err) {
@@ -421,24 +425,15 @@ let viewModule = function () {
             });
     }
 
-    async function requestSinglePostFromServerAsynchronously(id){
+    async function requestSinglePostFromServerAsynchronously(id) {
         const xhrParams = {
             id: id
         };
 
-        makeAsyncXmlHttpRequest('put', '/posts/getSinglePost', xhrParams)
-            .then(function (response) {
-                let post = JSON.parse(response);
-                correctCreatedAtFieldInPostAfterJsonParse(post);
-
-                debugger;
-
-                return post;
-            })
-            .catch(function (err) {
-                console.error(`error while processing xhr on /posts/getSinglePost`);
-                console.error(`err: ${err}`);
-            });
+        const response = await makeAsyncXmlHttpRequest('put', '/posts/getSinglePost', xhrParams);
+        let post = JSON.parse(response);
+        correctCreatedAtFieldInPostAfterJsonParse(post);
+        return post;
     }
 
     /* -------------- end of server communication methods ------------------- */
@@ -528,9 +523,9 @@ let viewModule = function () {
     }
 
     /* function to load posts from server response */
-    function loadPostsFromServerResponse(postsCollection){
+    function loadPostsFromServerResponse(postsCollection) {
 
-        if (!postsCollection){
+        if (!postsCollection) {
             console.error('loadPostsFromServerResponse: no "postsCollection" argument');
             return false;
         }
@@ -550,9 +545,10 @@ let viewModule = function () {
 
         return true;
     }
+
     /* end of function */
 
-    function resetPaginationOptions(){
+    function resetPaginationOptions() {
         numberOfVisiblePosts = 0;
     }
 

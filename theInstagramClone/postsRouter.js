@@ -37,7 +37,7 @@ router.put('/delete', function(req, res){
     }
     else{
         saveJsonToFileSync(postsCollection, pathToPostJsonFile);
-        res.statusText(200);
+        res.sendStatus(200);
     }
 });
 
@@ -54,7 +54,7 @@ router.put('/edit', (req, res)=>{
    }
    else{
        saveJsonToFileSync(postsCollection, pathToPostJsonFile);
-       res.statusText(200);
+       res.sendStatus(200);
    }
 });
 
