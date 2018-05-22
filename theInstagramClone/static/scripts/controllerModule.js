@@ -28,6 +28,7 @@ let controllerModule = function () {
 
     let postSchema = dataModule.postSchema;
 
+    // added
     let getPaginatedPosts = function (skip, length, filterConfig) {
 
         skip = skip || 0;
@@ -82,6 +83,7 @@ let controllerModule = function () {
         return tmpPosts.slice(skip, skip + length);
     };
 
+    // added
     function getPostById(id) {
         if (id === undefined) {
             return;
@@ -95,6 +97,7 @@ let controllerModule = function () {
         });
     }
 
+    // added
     function validatePost(p) {
         if (!p) {
             return false;
@@ -197,9 +200,10 @@ let controllerModule = function () {
         return true;
     }
 
+    // added
     // we do not remove posts permanently
     // but only set 'active' field to falsef
-    function removePost(id) {
+    function deletePost(id) {
         let postToRemove = getPostById(id);
         if (postToRemove === undefined) {
             return false;
@@ -216,7 +220,7 @@ let controllerModule = function () {
         getPostById: getPostById,
         addPost: addPost,
         editPost: editPost,
-        removePost: removePost,
+        deletePost: deletePost,
         getPosts: getPosts,
         setPosts: setPosts
     }

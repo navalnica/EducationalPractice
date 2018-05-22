@@ -1,32 +1,56 @@
 const   express = require('express'),
         fs      = require('fs');
 
+const pathToPostJsonFile = './posts.json';
+
 const router = express.Router();
 
 router.post('/getFilteredPosts', function (req, res) {
     console.log('-----------------');
-    console.log('POST response for filtered posts collection');
+    console.log('POST request for filtered posts collection');
 
-    const postsCollection = readJsonFileSync('./posts.json');
+    const postsCollection = readJsonFromFileSync(pathToPostJsonFile);
     postsCollection.forEach((post)=>{
         correctCreatedAtFieldInPostAfterJsonParse((post))
     });
 
     const body = req.body;
-    correctDateFieldInFilterConfigAfterJsonParse(body.filterConfig);
+    if (body.filterConfig){
+        correctDateFieldInFilterConfigAfterJsonParse(body.filterConfig);
+    }
 
     const filteredPostsCollection = getPaginatedPosts(postsCollection,
         body.filterConfig, body.numOfPostsToSkip, body.numOfPostsToLoad);
 
+    // automatically stringifies passed object
     res.send(filteredPostsCollection);
+});
+
+router.put('/delete', function(req, res){
+    console.log('-----------------');
+    console.log('processing /posts/delete request')
+
+    const id = req.body.id;
+    const postsCollection = readJsonFromFileSync(pathToPostJsonFile);
+    if (!deletePost(postsCollection, id)){
+        res.status(400).send('attempting to delete existing post or could not find post with such id');
+    }
+    else{
+        saveJsonToFileSync(postsCollection, pathToPostJsonFile);
+        res.status(200).send('all ok');
+    }
 });
 
 
 // ----------- functions ------------------
 
-function readJsonFileSync(filepath){
+function readJsonFromFileSync(filepath){
     const file = fs.readFileSync(filepath, 'utf8');
     return JSON.parse(file);
+}
+
+function saveJsonToFileSync(data, filepath){
+    fs.writeFileSync(filepath, JSON.stringify(data), 'utf-8');
 }
 
 function correctCreatedAtFieldInPostAfterJsonParse(post){
@@ -42,7 +66,7 @@ function correctDateFieldInFilterConfigAfterJsonParse(filterConfig){
     filterConfig.date = new Date(dateString);
 }
 
-let getPaginatedPosts = function (postsCollection, filterConfig, numOfPostToSkip, numOfPostsToLoad) {
+function getPaginatedPosts (postsCollection, filterConfig, numOfPostToSkip, numOfPostsToLoad) {
 
     numOfPostToSkip = numOfPostToSkip || 0;
     numOfPostsToLoad = numOfPostsToLoad || 10;
@@ -96,6 +120,28 @@ let getPaginatedPosts = function (postsCollection, filterConfig, numOfPostToSkip
     return tmpPosts.slice(numOfPostToSkip, numOfPostToSkip + numOfPostsToLoad);
 };
 
+function getPostById(postsCollection, id) {
+    if (!id) {
+        return;
+    }
+    if (id.constructor.name !== postSchema.id.constructorName) {
+        return;
+    }
+
+    return postsCollection.find(function (p) {
+        return p.id === id;
+    });
+}
+
+function deletePost(postsCollection, id) {
+    let postToRemove = getPostById(postsCollection, id);
+    if (!postToRemove || postToRemove.active === false) {
+        return false;
+    }
+    postToRemove.active = false;
+    return true;
+}
+
 function validatePost(p) {
     if (!p) {
         return false;
@@ -136,7 +182,7 @@ function validatePost(p) {
     return true;
 }
 
-// -------------- post chema ------------------
+// -------------- post schema ------------------
 let postSchema = {
     id: {
         constructorName: 'String',

@@ -137,10 +137,29 @@ let viewModule = function () {
                 });
 
                 modalPostNode.querySelector('.delete').addEventListener('click', () => {
+
                     modalDiv.style.display = 'none';
-                    controllerModule.removePost(curPost.id);
-                    saveChangesInPostsToLocalStorage();
-                    loadFirstPartOfThePosts();
+
+                    // send xhr on deletion
+                    const xhrParams = {
+                        id: id
+                    };
+
+                    makeRequest('put', '/posts/delete', xhrParams)
+                        .then(function (response) {
+                            console.log('xhr to /posts/delete processed successfully');
+                            console.log(`server responded with "${response}"`);
+                        })
+                        .catch(function (err) {
+                            console.error(`error while processing xhr on /posts/delete`);
+                            console.error(`err: ${err}`);
+                        });
+
+
+                    // get rid of old stuff
+                    // controllerModule.deletePost(curPost.id);
+                    // saveChangesInPostsToLocalStorage();
+                    // loadFirstPartOfThePosts();
                 });
 
                 modalPostNode.querySelector('.post-likes').addEventListener('click', (event) => {
@@ -311,26 +330,9 @@ let viewModule = function () {
                 }
             }
 
-            // TODO test and sort out what to do with pagination
             setFilterConfig(config);
-
-            // creating xml http request
-            const xhrParams = {
-                filterConfig: config,
-                numOfPostsToSkip: 0,
-                numOfPostsToLoad: 10
-            };
-            makeRequest('post', '/posts/getFilteredPosts', xhrParams)
-                .then(function (response) {
-                    console.log('xhr to /getFilteredPosts processed successfully. updating posts view');
-                    let filteredPostsCollection = JSON.parse(response);
-                    filteredPostsCollection.forEach((post)=>correctCreatedAtFieldInPostAfterJsonParse(post));
-                    loadPostsFromServerResponse(filteredPostsCollection);
-                })
-                .catch(function (err) {
-                    console.error(`error while processing xhr on /getFilteredPosts`);
-                    console.error(`err: ${err}`);
-                });
+            resetPaginationOptions();
+            requestAndLoadFilteredPostsFromServer();
         });
 
         document.querySelector('.filter-clear').addEventListener('click', function () {
@@ -393,6 +395,25 @@ let viewModule = function () {
     function correctCreatedAtFieldInPostAfterJsonParse(post){
         const dateString = post.createdAt;
         post.createdAt = new Date(dateString);
+    }
+
+    function requestAndLoadFilteredPostsFromServer(){
+        const xhrParams = {
+            filterConfig: filterConfig,
+            numOfPostsToSkip: numberOfVisiblePosts,
+            numOfPostsToLoad: numberOfPostsToLoad
+        };
+        makeRequest('post', '/posts/getFilteredPosts', xhrParams)
+            .then(function (response) {
+                console.log('xhr to /getFilteredPosts processed successfully. updating posts container');
+                let filteredPostsCollection = JSON.parse(response);
+                filteredPostsCollection.forEach((post)=>correctCreatedAtFieldInPostAfterJsonParse(post));
+                loadPostsFromServerResponse(filteredPostsCollection);
+            })
+            .catch(function (err) {
+                console.error(`error while processing xhr on /getFilteredPosts`);
+                console.error(`err: ${err}`);
+            });
     }
 
     /* -------------- end of server communication methods ------------------- */
@@ -509,14 +530,13 @@ let viewModule = function () {
     /* function to load posts from server response */
     function loadPostsFromServerResponse(postsCollection){
 
-        debugger;
-
         if (!postsCollection){
             console.error('loadPostsFromServerResponse: no "postsCollection" argument');
             return false;
         }
 
         // clear current content of posts container
+        numberOfVisiblePosts += postsCollection.length;
         content.innerHTML = "";
         let postTemplate = document.getElementById("post-template").content;
 
@@ -532,7 +552,12 @@ let viewModule = function () {
     }
     /* end of function */
 
+    function resetPaginationOptions(){
+        numberOfVisiblePosts = 0;
+    }
+
     function loadMorePosts() {
+        // TODO remove
         updateControllerModulePostsFromLocalStorage();
 
         let posts = controllerModule.getPaginatedPosts(numberOfVisiblePosts, numberOfPostsToLoad, filterConfig);
@@ -694,7 +719,8 @@ let viewModule = function () {
 
         setFilterConfig(null);
         fillUserSelectWithOptions();
-        loadFirstPartOfThePosts();
+        resetPaginationOptions();
+        requestAndLoadFilteredPostsFromServer();
 
         let currentUserIx = localStorage.getItem('currentUserIx');
         if (!currentUserIx) {
