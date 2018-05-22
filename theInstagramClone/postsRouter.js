@@ -28,7 +28,7 @@ router.post('/getFilteredPosts', function (req, res) {
 
 router.put('/delete', function(req, res){
     console.log('-----------------');
-    console.log('processing /posts/delete request')
+    console.log('processing /posts/delete request');
 
     const id = req.body.id;
     const postsCollection = readJsonFromFileSync(pathToPostJsonFile);
@@ -37,10 +37,33 @@ router.put('/delete', function(req, res){
     }
     else{
         saveJsonToFileSync(postsCollection, pathToPostJsonFile);
-        res.status(200).send('all ok');
+        res.statusText(200);
     }
 });
 
+router.put('/edit', (req, res)=>{
+   console.log('-----------------');
+   console.log('processing /posts/edit request');
+
+   const id = req.body.id;
+   const newData = req.body.newData;
+   const postsCollection = readJsonFromFileSync(pathToPostJsonFile);
+
+   if (!editPost(postsCollection, id, newData)){
+       res.status(400).send('error while editing post');
+   }
+   else{
+       saveJsonToFileSync(postsCollection, pathToPostJsonFile);
+       res.statusText(200);
+   }
+});
+
+router.put('/getSinglePost', (req, res)=>{
+   const id = req.body.id;
+   const postsCollection = readJsonFromFileSync(pathToPostJsonFile);
+   const post = getPostById(postsCollection, id);
+   res.send(post); // TODO check response code
+});
 
 // ----------- functions ------------------
 
@@ -179,6 +202,58 @@ function validatePost(p) {
         }
     }
 
+    return true;
+}
+
+function editPost(postsCollection, id, input) {
+    let oldPost = getPostById(postsCollection, id);
+    if (!oldPost) {
+        return false;
+    }
+
+    correctCreatedAtFieldInPostAfterJsonParse(oldPost);
+
+    // creating a copy of the oldPost object
+    let editedPost = Object.assign({}, oldPost);
+
+    for (let prop in input) {
+        if (input.hasOwnProperty(prop)) {
+            if (input[prop] === null || input[prop] === undefined) {
+                return false;
+            }
+            if (!editedPost.hasOwnProperty(prop)) {
+                return false;
+            }
+            switch (prop) {
+                case 'description':
+                case 'photoLink': {
+                    editedPost[prop] = input[prop];
+                }
+                    break;
+
+                case 'hashtags':
+                case 'likesFrom': {
+                    editedPost[prop] = input[prop].slice();
+                }
+                    break;
+
+                default:
+                    return false;
+            }
+        }
+    }
+
+    if (!validatePost(editedPost))
+        return false;
+
+    // replace old post with the new one
+    let postId = postsCollection.findIndex(function (item) {
+        return item.id === id;
+    });
+    if (postId === -1)
+        return false;
+
+    postsCollection[postId] = editedPost;
     return true;
 }
 

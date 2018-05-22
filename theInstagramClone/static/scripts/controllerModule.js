@@ -150,6 +150,7 @@ let controllerModule = function () {
         return true;
     }
 
+    // added
     function editPost(id, input) {
         let oldPost = getPostById(id);
         if (oldPost === undefined) {
