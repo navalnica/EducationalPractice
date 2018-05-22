@@ -311,36 +311,25 @@ let viewModule = function () {
                 }
             }
 
+            // TODO test and sort out what to do with pagination
             setFilterConfig(config);
-            loadFirstPartOfThePosts();
-
-            // TODO remove
-
-            // const xhr = new XMLHttpRequest();
-            // xhr.open('GET', 'posts.json');
-            // xhr.onload = function () {
-            //     if (this.status === 200) {
-            //         const posts = JSON.parse(this.responseText);
-            //         console.log('posts successfully parsed!');
-            //         console.log(posts);
-            //     }
-            //     else {
-            //         console.log('error occured while loading json file');
-            //     }
-            // }
-            //
-            // xhr.send();
-
-            // end of remove block
 
             // creating xml http request
-            makeRequest('GET', '/posts/get', config)
-                .then(function (datums) {
-                    console.log('all is ok. xhr processed. result:');
-                    console.log(datums);
+            const xhrParams = {
+                filterConfig: config,
+                numOfPostsToSkip: 0,
+                numOfPostsToLoad: 10
+            };
+            makeRequest('post', '/posts/getFilteredPosts', xhrParams)
+                .then(function (response) {
+                    console.log('xhr to /getFilteredPosts processed successfully. updating posts view');
+                    let filteredPostsCollection = JSON.parse(response);
+                    filteredPostsCollection.forEach((post)=>correctCreatedAtFieldInPostAfterJsonParse(post));
+                    loadPostsFromServerResponse(filteredPostsCollection);
                 })
                 .catch(function (err) {
-                    console.error('Augh, there was an error!', err.statusText);
+                    console.error(`error while processing xhr on /getFilteredPosts`);
+                    console.error(`err: ${err}`);
                 });
         });
 
@@ -383,6 +372,7 @@ let viewModule = function () {
                     resolve(xhr.response);
                 } else {
                     reject({
+                        // TODO sort out how and where reject is called
                         status: this.status,
                         statusText: xhr.statusText
                     });
@@ -400,7 +390,12 @@ let viewModule = function () {
         });
     }
 
-    /* -------------- server communication methods ------------------- */
+    function correctCreatedAtFieldInPostAfterJsonParse(post){
+        const dateString = post.createdAt;
+        post.createdAt = new Date(dateString);
+    }
+
+    /* -------------- end of server communication methods ------------------- */
 
     function fillPostTemplateWithData(postNode, postObject) {
         postNode.querySelector(".post-image").querySelector('img').setAttribute('src', postObject.photoLink);
@@ -487,6 +482,7 @@ let viewModule = function () {
     }
 
     function loadFirstPartOfThePosts() {
+        // TODO get rid of method
         updateControllerModulePostsFromLocalStorage();
 
         let posts = controllerModule.getPaginatedPosts(0, numberOfPostsToLoad, filterConfig);
@@ -509,6 +505,32 @@ let viewModule = function () {
 
         }
     }
+
+    /* function to load posts from server response */
+    function loadPostsFromServerResponse(postsCollection){
+
+        debugger;
+
+        if (!postsCollection){
+            console.error('loadPostsFromServerResponse: no "postsCollection" argument');
+            return false;
+        }
+
+        // clear current content of posts container
+        content.innerHTML = "";
+        let postTemplate = document.getElementById("post-template").content;
+
+        for (let i = 0; i < postsCollection.length; i++) {
+            let curPost = postsCollection[i];
+            let postNode = document.importNode(postTemplate, true);
+            postNode.querySelector('.post').setAttribute('id', curPost.id);
+            fillPostTemplateWithData(postNode, curPost);
+            content.appendChild(postNode);
+        }
+
+        return true;
+    }
+    /* end of function */
 
     function loadMorePosts() {
         updateControllerModulePostsFromLocalStorage();
