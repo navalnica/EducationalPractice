@@ -2,6 +2,7 @@ const   express = require('express'),
         fs      = require('fs');
 
 const pathToPostJsonFile = './posts.json';
+const pathToUsersJsonFile = './users.json';
 
 const router = express.Router();
 
@@ -63,6 +64,32 @@ router.put('/getSinglePost', (req, res)=>{
    const postsCollection = readJsonFromFileSync(pathToPostJsonFile);
    const post = getPostById(postsCollection, id);
    res.send(post); // TODO check response code
+});
+
+router.put('/addPost', (req,res)=>{
+    // TODO upload image and set link to it in the new post
+    console.log('-----------------');
+    console.log('processing /posts/add request');
+
+    const newPostData = req.body.newPostData;
+    const postsCollection = readJsonFromFileSync(pathToPostJsonFile);
+
+    if (!addPost(postsCollection, newPostData)){
+        res.status(400).send('error while adding new post');
+    }
+    else{
+        saveJsonToFileSync(postsCollection, pathToPostJsonFile);
+        res.sendStatus(200);
+    }
+});
+
+router.get('/getUsersList', (req, res)=>{
+    console.log('-----------');
+    console.log('processing /posts/getUsersList request');
+
+    const users = readJsonFromFileSync(pathToUsersJsonFile);
+    const reducedUsersCollection = users.map(user=>{return user.name});
+    res.send(reducedUsersCollection);
 });
 
 // ----------- functions ------------------
@@ -254,6 +281,18 @@ function editPost(postsCollection, id, input) {
         return false;
 
     postsCollection[postId] = editedPost;
+    return true;
+}
+
+function addPost(postsCollection, newPost) {
+    newPost.id = postsCollection.length + 1;
+    newPost.likesFrom = [];
+    newPost.active = true;
+
+    if (!validatePost(newPost))
+        return false;
+
+    postsCollection.push(newPost);
     return true;
 }
 

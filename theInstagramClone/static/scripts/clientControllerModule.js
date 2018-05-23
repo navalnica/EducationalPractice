@@ -1,4 +1,16 @@
-let viewModule = function () {
+/* TODO:
+   get rid of 'saveChangesInPostsToLocalStorage'
+   and 'controllerModule' usages
+   figure out what to do with likes
+
+   upload photos via multer
+
+   add long polling
+*/
+
+let clientControllerModule = function () {
+
+    const localStoragePostsCollectionFieldname = 'postsCollection';
 
     let hashtagBlockTemplate = null;
     let modalPostTemplate = null;
@@ -12,13 +24,13 @@ let viewModule = function () {
     let content = null;
     let curHashtagDiv = null;
 
-    let users = dataModule.users;
+    let users = null; // TODO: rename to 'usersList'
     let filterConfig = null;
 
     let numberOfVisiblePosts = 0;
     let numberOfPostsToLoad = 10;
 
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', async function () {
 
         filterHashtagsDiv = document.querySelector('.filter-hashtags');
         hashtagBlockTemplate = document.querySelector('#filter-hashtag-block').content;
@@ -37,7 +49,7 @@ let viewModule = function () {
             if (event.target.closest('.post-likes')) {
 
                 id = event.target.closest('.post').getAttribute('id');
-                curPost = controllerModule.getPostById(id);
+                curPost = getSinglePostByIdFromLocalStorage(id);
                 currentUserIx = localStorage.getItem('currentUserIx') || -1;
 
                 if (currentUserIx > -1) {
@@ -133,7 +145,7 @@ let viewModule = function () {
                                 console.log('xhr to /posts/edit processed successfully');
                                 console.log(`server responded with "${response}"`);
                                 resetPaginationOptions();
-                                requestAndLoadFilteredPostsFromServer();
+                                requestAndLoadFilteredPostsFromServerAsynchronously();
                             })
                             .catch(function (err) {
                                 console.error(`error while processing xhr on /posts/edit`);
@@ -166,7 +178,7 @@ let viewModule = function () {
                             console.log('xhr to /posts/delete processed successfully');
                             console.log(`server responded with "${response}"`);
                             resetPaginationOptions();
-                            requestAndLoadFilteredPostsFromServer();
+                            requestAndLoadFilteredPostsFromServerAsynchronously();
                         })
                         .catch(function (err) {
                             console.error(`error while processing xhr on /posts/delete`);
@@ -221,51 +233,65 @@ let viewModule = function () {
             creatingHashtagDiv.addEventListener('focusout', onHashtagInputFocusOut);
             creatingHashtagDiv.addEventListener('click', onHashtagRemoveButtonClick);
 
-            modalCreatingNode.querySelector('#creating-image-file').addEventListener('change', checkSelectedImageFile);
+            modalCreatingNode.querySelector('#creating-image-file')
+                .addEventListener('change', checkSelectedImageFile);
 
-            let newPost = {};
-            let currentUserIx = localStorage.getItem('currentUserIx') || -1;
-            newPost.user = users[currentUserIx].name;
-            newPost.createdAt = new Date();
+            let newPostData = {};
+            const currentUserIx = localStorage.getItem('currentUserIx') || -1;
+            newPostData.user = users[currentUserIx].name;
+            newPostData.createdAt = new Date();
 
-            modalCreatingNode.querySelector('.post-user').innerText = newPost.user;
-            let dateString = `${newPost.createdAt.getDate()}/${(newPost.createdAt.getMonth() + 1)}/${newPost.createdAt.getFullYear()}`;
-            modalCreatingNode.querySelector('.post-date').innerText = dateString;
+            modalCreatingNode.querySelector('.post-user').innerText = newPostData.user;
+            modalCreatingNode.querySelector('.post-date').innerText =
+                `${newPostData.createdAt.getDate()}/${(newPostData.createdAt.getMonth() + 1)}/
+                ${newPostData.createdAt.getFullYear()}`;
 
             modalCreatingNode.querySelector('.save').addEventListener('click', () => {
 
-                let form = document.querySelector('#creating-form');
-
-                newPost.description = form.elements['description'].value;
-
-                if (!newPost.description) {
-                    let errorSpan = document.querySelector('.error-span');
+                const form = document.querySelector('#creating-form');
+                newPostData.description = form.elements['description'].value;
+                if (!newPostData.description) {
+                    const errorSpan = document.querySelector('.error-span');
                     errorSpan.innerText = 'Description is required';
                     errorSpan.style.display = 'block';
                     return;
                 }
 
-                newPost.hashtags = [];
-                let hashtags = form.elements['hashtag'];
+                newPostData.hashtags = [];
+                const hashtags = form.elements['hashtag'];
                 for (let i = 0; i < hashtags.length; i++) {
                     if (hashtags[i].value) {
-                        newPost.hashtags.push(hashtags[i].value);
+                        newPostData.hashtags.push(hashtags[i].value);
                     }
                 }
 
                 let files = form.elements['image-file'].files;
                 if (files.length === 1) {
-                    newPost.photoLink = 'photos/' + files[0].name;
+                    newPostData.photoLink = 'photos/' + files[0].name;
+                }
+                else{
+                    // TODO: check
+                    debugger;
+                    return;
                 }
 
                 // save changes
-                let success = controllerModule.addPost(newPost);
-                if (success) {
-                    saveChangesInPostsToLocalStorage();
-                }
+                const xhrParams = {
+                    newPostData: newPostData
+                };
+                makeAsyncXmlHttpRequest('put', '/posts/add', xhrParams)
+                    .then(function (response) {
+                        console.log('xhr to /posts/add processed successfully');
+                        console.log(`server responded with "${response}"`);
+                        resetPaginationOptions();
+                        requestAndLoadFilteredPostsFromServerAsynchronously();
+                    })
+                    .catch(function (err) {
+                        console.error(`error while processing xhr on /posts/add`);
+                        console.error(`err: ${err}`);
+                    });
 
                 modalDiv.style.display = 'none';
-                requestAndLoadFilteredPostsFromServer();
                 curHashtagDiv = filterHashtagsDiv;
             });
 
@@ -305,13 +331,15 @@ let viewModule = function () {
 
         document.querySelector('#log-out').addEventListener('click', () => {
             setCurrentUserByIndex(-1);
+            resetPaginationOptions();
+            requestAndLoadFilteredPostsFromServerAsynchronously();
         });
 
         document.querySelector('#my-photos').addEventListener('click', () => {
-            let currentUserIx = localStorage.getItem('currentUserIx') || -1;
+            const currentUserIx = localStorage.getItem('currentUserIx') || -1;
             setFilterConfig({user: users[currentUserIx].name});
             resetPaginationOptions();
-            requestAndLoadFilteredPostsFromServer();
+            requestAndLoadFilteredPostsFromServerAsynchronously();
         });
 
         window.addEventListener('click', function (event) {
@@ -345,13 +373,13 @@ let viewModule = function () {
 
             setFilterConfig(config);
             resetPaginationOptions();
-            requestAndLoadFilteredPostsFromServer();
+            requestAndLoadFilteredPostsFromServerAsynchronously();
         });
 
         document.querySelector('.filter-clear').addEventListener('click', function () {
             clearFilterFields();
             resetPaginationOptions();
-            requestAndLoadFilteredPostsFromServer();
+            requestAndLoadFilteredPostsFromServerAsynchronously();
         });
 
         document.querySelector('.load-more-button').addEventListener('click', () => {
@@ -366,7 +394,7 @@ let viewModule = function () {
 
         // ------- commands on document load ---------
 
-        init();
+        await init();
 
     });
 
@@ -401,12 +429,7 @@ let viewModule = function () {
         });
     }
 
-    function correctCreatedAtFieldInPostAfterJsonParse(post) {
-        const dateString = post.createdAt;
-        post.createdAt = new Date(dateString);
-    }
-
-    function requestAndLoadFilteredPostsFromServer() {
+    function requestAndLoadFilteredPostsFromServerAsynchronously() {
         const xhrParams = {
             filterConfig: filterConfig,
             numOfPostsToSkip: numberOfVisiblePosts,
@@ -414,10 +437,9 @@ let viewModule = function () {
         };
         makeAsyncXmlHttpRequest('post', '/posts/getFilteredPosts', xhrParams)
             .then(function (response) {
-                console.log('xhr to /getFilteredPosts processed successfully. updating posts container');
-                let filteredPostsCollection = JSON.parse(response);
-                filteredPostsCollection.forEach((post) => correctCreatedAtFieldInPostAfterJsonParse(post));
-                loadPostsFromServerResponse(filteredPostsCollection);
+                console.log('xhr to /getFilteredPosts processed successfully. posts loaded');
+                updateLocalStoragePostsCollection(repsonse); // response in json format
+                updatePostsContainer();
             })
             .catch(function (err) {
                 console.error(`error while processing xhr on /getFilteredPosts`);
@@ -436,7 +458,61 @@ let viewModule = function () {
         return post;
     }
 
+    async function updateUsersListByAsynchronousRequestToServer(){
+        const response = await makeAsyncXmlHttpRequest('GET', '/posts/getUsersList');
+        users = JSON.parse(response);
+    }
+
     /* -------------- end of server communication methods ------------------- */
+
+    function correctCreatedAtFieldInPostAfterJsonParse(post) {
+        const dateString = post.createdAt;
+        post.createdAt = new Date(dateString);
+    }
+
+    function updateLocalStoragePostsCollection(postsCollectionJson){
+        localStorage.setItem(localStoragePostsCollectionFieldname, postsCollectionJson);
+    }
+
+    function getPostsCollectionFromLocalStorage(){
+        let postsJson = localStorage.getItem(localStoragePostsCollectionFieldname);
+        let filteredPostsCollection = JSON.parse(postsJson);
+        filteredPostsCollection.forEach((post) => correctCreatedAtFieldInPostAfterJsonParse(post));
+        return filteredPostsCollection;
+    }
+
+    function getSinglePostByIdFromLocalStorage(id){
+        const postsCollection = getPostsCollectionFromLocalStorage();
+        const post = postsCollection.find((p)=>{
+            return p.id === id;
+        });
+        debugger;
+        return post;
+    }
+
+    function updatePostsContainer() {
+        const postsCollection = getPostsCollectionFromLocalStorage();
+
+        if (!postsCollection) {
+            console.error('could not find postsCollection in localStorage');
+            return false;
+        }
+
+        // clear current content of posts container
+        numberOfVisiblePosts += postsCollection.length;
+        content.innerHTML = "";
+        let postTemplate = document.getElementById("post-template").content;
+
+        for (let i = 0; i < postsCollection.length; i++) {
+            let curPost = postsCollection[i];
+            let postNode = document.importNode(postTemplate, true);
+            postNode.querySelector('.post').setAttribute('id', curPost.id);
+            fillPostTemplateWithData(postNode, curPost);
+            content.appendChild(postNode);
+        }
+
+        return true;
+    }
 
     function fillPostTemplateWithData(postNode, postObject) {
         postNode.querySelector(".post-image").querySelector('img').setAttribute('src', postObject.photoLink);
@@ -522,45 +598,8 @@ let viewModule = function () {
         }
     }
 
-    /* function to load posts from server response */
-    function loadPostsFromServerResponse(postsCollection) {
-
-        if (!postsCollection) {
-            console.error('loadPostsFromServerResponse: no "postsCollection" argument');
-            return false;
-        }
-
-        // clear current content of posts container
-        numberOfVisiblePosts += postsCollection.length;
-        content.innerHTML = "";
-        let postTemplate = document.getElementById("post-template").content;
-
-        for (let i = 0; i < postsCollection.length; i++) {
-            let curPost = postsCollection[i];
-            let postNode = document.importNode(postTemplate, true);
-            postNode.querySelector('.post').setAttribute('id', curPost.id);
-            fillPostTemplateWithData(postNode, curPost);
-            content.appendChild(postNode);
-        }
-
-        return true;
-    }
-
-    /* end of function */
-
     function resetPaginationOptions() {
         numberOfVisiblePosts = 0;
-    }
-
-    function updateControllerModulePostsFromLocalStorage() {
-        let localJsonPosts = localStorage.getItem('jsonPosts');
-        if (localJsonPosts) {
-            localJsonPosts = JSON.parse(localJsonPosts);
-            localJsonPosts.forEach((item) => {
-                item.createdAt = new Date(item.createdAt);
-            });
-            controllerModule.setPosts(localJsonPosts);
-        }
     }
 
     function setFilterConfig(config) {
@@ -663,11 +702,6 @@ let viewModule = function () {
         }
     }
 
-    function saveChangesInPostsToLocalStorage() {
-        let jsonPosts = JSON.stringify(controllerModule.getPosts());
-        localStorage.setItem('jsonPosts', jsonPosts);
-    }
-
     function setPostLikeStatus(postLikesDiv, isSet) {
         let img = postLikesDiv.querySelector('.likes-image');
         let likesSpan = postLikesDiv.querySelector('.post-likes-number');
@@ -684,15 +718,16 @@ let viewModule = function () {
         }
     }
 
-    function init() {
+    async function init() {
 
         content = document.getElementById('content');
         curHashtagDiv = filterHashtagsDiv;
 
         setFilterConfig(null);
-        fillUserSelectWithOptions();
         resetPaginationOptions();
-        requestAndLoadFilteredPostsFromServer();
+        requestAndLoadFilteredPostsFromServerAsynchronously();
+        await updateUsersListByAsynchronousRequestToServer();
+        fillUserSelectWithOptions();
 
         let currentUserIx = localStorage.getItem('currentUserIx');
         if (!currentUserIx) {
