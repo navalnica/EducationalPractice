@@ -57,6 +57,11 @@ header {
     padding-left: 20px;
 }
 
+#siteTitle{
+    cursor: pointer;
+    color: lightseagreen;
+}
+
 .current-user-name {
     text-align: right;
     border-bottom: 5px solid lightseagreen;

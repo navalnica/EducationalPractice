@@ -1,122 +1,140 @@
-const   express = require('express'),
-        fs      = require('fs');
-
-const pathToPostJsonFile = './posts.json';
-const pathToUsersJsonFile = './users.json';
+const express = require('express');
+const fs = require('fs');
 
 const router = express.Router();
 
-router.post('/getFilteredPosts', function (req, res) {
-    console.log('-----------------');
-    console.log('POST request for filtered posts collection');
+let activePostsCollection = null;
+const pathToPostJsonFile = './posts.json';
 
-    const postsCollection = readJsonFromFileSync(pathToPostJsonFile);
-    postsCollection.forEach((post)=>{
+// path are accessible from the client html page
+const pathToLikedIcon = 'icons/heart_full_32.png';
+const pathToNotLikedIcon = 'icons/heart_empty_32.png';
+
+router.post('/getFilteredPosts', function (req, res) {
+    activePostsCollection = readJsonFromFileSync(pathToPostJsonFile);
+    activePostsCollection.forEach((post) => {
         correctCreatedAtFieldInPostAfterJsonParse((post))
     });
 
     const body = req.body;
-    if (body.filterConfig){
+    if (body.filterConfig) {
         correctDateFieldInFilterConfigAfterJsonParse(body.filterConfig);
     }
 
-    const filteredPostsCollection = getPaginatedPosts(postsCollection,
-        body.filterConfig, body.numOfPostsToSkip, body.numOfPostsToLoad);
+    activePostsCollection = getPaginatedPosts(activePostsCollection,
+        body.filterConfig, req.app.get('currentUserName'), body.numOfPostsToSkip, body.numOfPostsToLoad);
 
     // automatically stringifies passed object
-    res.send(filteredPostsCollection);
+    res.send(activePostsCollection);
 });
 
-router.put('/delete', function(req, res){
+router.put('/delete', function (req, res) {
     console.log('-----------------');
     console.log('processing /posts/delete request');
 
     const id = req.body.id;
     const postsCollection = readJsonFromFileSync(pathToPostJsonFile);
-    if (!deletePost(postsCollection, id)){
+    if (!deletePost(postsCollection, id)) {
         res.status(400).send('attempting to delete existing post or could not find post with such id');
     }
-    else{
+    else {
         saveJsonToFileSync(postsCollection, pathToPostJsonFile);
         res.sendStatus(200);
     }
 });
 
-router.put('/edit', (req, res)=>{
-   console.log('-----------------');
-   console.log('processing /posts/edit request');
+router.put('/edit', (req, res) => {
+    console.log('-----------------');
+    console.log('processing /posts/edit request');
 
-   const id = req.body.id;
-   const newData = req.body.newData;
-   const postsCollection = readJsonFromFileSync(pathToPostJsonFile);
+    const id = req.body.id;
+    const newData = req.body.newData;
+    const postsCollection = readJsonFromFileSync(pathToPostJsonFile);
 
-   if (!editPost(postsCollection, id, newData)){
-       res.status(400).send('error while editing post');
-   }
-   else{
-       saveJsonToFileSync(postsCollection, pathToPostJsonFile);
-       res.sendStatus(200);
-   }
+    if (!editPost(postsCollection, id, newData)) {
+        res.status(400).send('error while editing post');
+    }
+    else {
+        saveJsonToFileSync(postsCollection, pathToPostJsonFile);
+        res.sendStatus(200);
+    }
 });
 
-router.put('/getSinglePost', (req, res)=>{
-   const id = req.body.id;
-   const postsCollection = readJsonFromFileSync(pathToPostJsonFile);
-   const post = getPostById(postsCollection, id);
-   res.send(post); // TODO check response code
+router.put('/getSinglePost', (req, res) => {
+    const id = req.body.id;
+    let post = getPostById(activePostsCollection, id);
+    post.isEditable = (req.app.get('currentUserName') === post.user);
+    res.send(post);
 });
 
-router.put('/addPost', (req,res)=>{
+router.put('/add', (req, res) => {
     // TODO upload image and set link to it in the new post
     console.log('-----------------');
     console.log('processing /posts/add request');
 
-    const newPostData = req.body.newPostData;
+    let newPostData = req.body.newPostData;
+    correctCreatedAtFieldInPostAfterJsonParse(newPostData);
+    newPostData.user = req.app.get('currentUserName');
     const postsCollection = readJsonFromFileSync(pathToPostJsonFile);
 
-    if (!addPost(postsCollection, newPostData)){
+    if (!addPost(postsCollection, newPostData)) {
         res.status(400).send('error while adding new post');
     }
-    else{
+    else {
         saveJsonToFileSync(postsCollection, pathToPostJsonFile);
         res.sendStatus(200);
     }
 });
 
-router.get('/getUsersList', (req, res)=>{
-    console.log('-----------');
-    console.log('processing /posts/getUsersList request');
-
-    const users = readJsonFromFileSync(pathToUsersJsonFile);
-    const reducedUsersCollection = users.map(user=>{return user.name});
-    res.send(reducedUsersCollection);
+router.put('/addLike', (req, res) => {
+    const userName = req.app.get('currentUserName');
+    if (!userName){
+        res.sendStatus(400);
+    }
+    else{
+        const postId = req.body.id;
+        let postsCollection = readJsonFromFileSync(pathToPostJsonFile);
+        let post = postsCollection.find(p => p.id === postId);
+        const ix = post.likesFrom.indexOf(userName);
+        if (ix >= 0) {
+            post.likesFrom.splice(ix, 1);
+            saveJsonToFileSync(postsCollection, pathToPostJsonFile);
+            res.send({icon: pathToNotLikedIcon, count: post.likesFrom.length});
+        }
+        else {
+            post.likesFrom.push(userName);
+            saveJsonToFileSync(postsCollection, pathToPostJsonFile);
+            res.send({icon: pathToLikedIcon, count: post.likesFrom.length});
+        }
+    }
 });
 
 // ----------- functions ------------------
 
-function readJsonFromFileSync(filepath){
+function readJsonFromFileSync(filepath) {
     const file = fs.readFileSync(filepath, 'utf8');
     return JSON.parse(file);
 }
 
-function saveJsonToFileSync(data, filepath){
+function saveJsonToFileSync(data, filepath) {
     fs.writeFileSync(filepath, JSON.stringify(data), 'utf-8');
 }
 
-function correctCreatedAtFieldInPostAfterJsonParse(post){
+function correctCreatedAtFieldInPostAfterJsonParse(post) {
     const dateString = post.createdAt;
     post.createdAt = new Date(dateString);
 }
 
-function correctDateFieldInFilterConfigAfterJsonParse(filterConfig){
+function correctDateFieldInFilterConfigAfterJsonParse(filterConfig) {
     const dateString = filterConfig.date;
-    if (!dateString){
+    if (!dateString) {
         return;
     }
     filterConfig.date = new Date(dateString);
 }
 
-function getPaginatedPosts (postsCollection, filterConfig, numOfPostToSkip, numOfPostsToLoad) {
+function getPaginatedPosts(postsCollection, filterConfig,
+                           currentUserName, numOfPostToSkip, numOfPostsToLoad) {
 
     numOfPostToSkip = numOfPostToSkip || 0;
     numOfPostsToLoad = numOfPostsToLoad || 10;
@@ -167,8 +185,17 @@ function getPaginatedPosts (postsCollection, filterConfig, numOfPostToSkip, numO
 
     }
 
+    tmpPosts.forEach(post => {
+        if (post.likesFrom.indexOf(currentUserName) >= 0) {
+            post.pathToLikeIcon = pathToLikedIcon;
+        }
+        else {
+            post.pathToLikeIcon = pathToNotLikedIcon;
+        }
+    });
+
     return tmpPosts.slice(numOfPostToSkip, numOfPostToSkip + numOfPostsToLoad);
-};
+}
 
 function getPostById(postsCollection, id) {
     if (!id) {
@@ -196,13 +223,12 @@ function validatePost(p) {
     if (!p) {
         return false;
     }
-
     if (Object.keys(postSchema).length !== Object.keys(p).length) {
         return false;
     }
 
     for (let key in postSchema) {
-        if (postSchema.hasOwnProperty(key)){
+        if (postSchema.hasOwnProperty(key)) {
             if (p[key] === undefined || p[key] === null) {
                 return false;
             }
@@ -237,7 +263,6 @@ function editPost(postsCollection, id, input) {
     if (!oldPost) {
         return false;
     }
-
     correctCreatedAtFieldInPostAfterJsonParse(oldPost);
 
     // creating a copy of the oldPost object
@@ -277,15 +302,12 @@ function editPost(postsCollection, id, input) {
     let postId = postsCollection.findIndex(function (item) {
         return item.id === id;
     });
-    if (postId === -1)
-        return false;
-
     postsCollection[postId] = editedPost;
     return true;
 }
 
 function addPost(postsCollection, newPost) {
-    newPost.id = postsCollection.length + 1;
+    newPost.id = (postsCollection.length + 1).toString();
     newPost.likesFrom = [];
     newPost.active = true;
 
