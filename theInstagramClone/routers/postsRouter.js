@@ -1,31 +1,98 @@
 const express = require('express');
 const fs = require('fs');
+const multer = require('multer');
 
 const router = express.Router();
 
-let activePostsCollection = null;
-const pathToPostJsonFile = './posts.json';
+const storage = multer.diskStorage({
+    destination: function (req, file, callback) {
+        callback(null, './static/photos/');
+    },
+    filename: function (req, file, callback) {
+        const dateTimeStamp = Date.now();
+        callback(null, file.fieldname + '-' + dateTimeStamp + '.' +
+            file.originalname.split('.')[file.originalname.split('.').length - 1]);
+    }
+});
+const upload = multer({storage: storage});
+
+const pathToPostsJsonFile = __dirname + '/../posts.json';
 
 // path are accessible from the client html page
 const pathToLikedIcon = 'icons/heart_full_32.png';
 const pathToNotLikedIcon = 'icons/heart_empty_32.png';
 
 router.post('/getFilteredPosts', function (req, res) {
-    activePostsCollection = readJsonFromFileSync(pathToPostJsonFile);
-    activePostsCollection.forEach((post) => {
-        correctCreatedAtFieldInPostAfterJsonParse((post))
-    });
+    let postsCollection = readJsonFromFileSync(pathToPostsJsonFile);
+    postsCollection.forEach((post) =>correctCreatedAtFieldInPostAfterJsonParse(post));
 
     const body = req.body;
     if (body.filterConfig) {
         correctDateFieldInFilterConfigAfterJsonParse(body.filterConfig);
     }
-
-    activePostsCollection = getPaginatedPosts(activePostsCollection,
+    postsCollection = getPaginatedPosts(postsCollection,
         body.filterConfig, req.app.get('currentUserName'), body.numOfPostsToSkip, body.numOfPostsToLoad);
 
-    // automatically stringifies passed object
-    res.send(activePostsCollection);
+    res.send(postsCollection);
+});
+
+router.put('/getSinglePost', (req, res) => {
+    const id = req.body.id;
+    const postsCollection = readJsonFromFileSync(pathToPostsJsonFile);
+    postsCollection.forEach(p=>correctCreatedAtFieldInPostAfterJsonParse(p));
+
+    let post = getPostById(postsCollection, id);
+    const currentUserName = req.app.get('currentUserName');
+    post.isEditable = (currentUserName === post.user);
+    setPostLikesData(post, currentUserName);
+    res.send(post);
+});
+
+router.put('/sendPhoto', upload.single('photo'), (req, res) => {
+    // argument of the upload.single must be the same
+    // as the field with file sent in FormData object on client js
+
+    // the name given to the uploaded file by multer
+    let filename = req.file.filename;
+    console.log(`/posts/uploadPhoto route: uploaded file name is '${filename}'`);
+    filename = 'photos/' + filename;
+    res.send(filename);
+});
+
+router.put('/add', (req, res) => {
+    console.log('processing /posts/add request');
+
+    let newPostData = req.body.newPostData;
+    correctCreatedAtFieldInPostAfterJsonParse(newPostData);
+    newPostData.user = req.app.get('currentUserName');
+    const postsCollection = readJsonFromFileSync(pathToPostsJsonFile);
+
+    if (!addPost(postsCollection, newPostData)) {
+        res.status(400).send('error while adding new post');
+    }
+    else {
+        saveJsonToFileSync(postsCollection, pathToPostsJsonFile);
+        res.sendStatus(200);
+    }
+
+});
+
+router.put('/edit', (req, res) => {
+    console.log('<-- processing /posts/edit request -->');
+
+    const id = req.body.id;
+    const newData = req.body.newData;
+    const postsCollection = readJsonFromFileSync(pathToPostsJsonFile);
+
+    if (!editPost(postsCollection, id, newData)) {
+        console.log('<-- failed to edit post -->');
+        res.status(400).send('error while editing post');
+    }
+    else {
+        saveJsonToFileSync(postsCollection, pathToPostsJsonFile);
+        console.log('<-- edited seccessfully -->');
+        res.sendStatus(200);
+    }
 });
 
 router.put('/delete', function (req, res) {
@@ -33,77 +100,34 @@ router.put('/delete', function (req, res) {
     console.log('processing /posts/delete request');
 
     const id = req.body.id;
-    const postsCollection = readJsonFromFileSync(pathToPostJsonFile);
+    const postsCollection = readJsonFromFileSync(pathToPostsJsonFile);
     if (!deletePost(postsCollection, id)) {
         res.status(400).send('attempting to delete existing post or could not find post with such id');
     }
     else {
-        saveJsonToFileSync(postsCollection, pathToPostJsonFile);
-        res.sendStatus(200);
-    }
-});
-
-router.put('/edit', (req, res) => {
-    console.log('-----------------');
-    console.log('processing /posts/edit request');
-
-    const id = req.body.id;
-    const newData = req.body.newData;
-    const postsCollection = readJsonFromFileSync(pathToPostJsonFile);
-
-    if (!editPost(postsCollection, id, newData)) {
-        res.status(400).send('error while editing post');
-    }
-    else {
-        saveJsonToFileSync(postsCollection, pathToPostJsonFile);
-        res.sendStatus(200);
-    }
-});
-
-router.put('/getSinglePost', (req, res) => {
-    const id = req.body.id;
-    let post = getPostById(activePostsCollection, id);
-    post.isEditable = (req.app.get('currentUserName') === post.user);
-    res.send(post);
-});
-
-router.put('/add', (req, res) => {
-    // TODO upload image and set link to it in the new post
-    console.log('-----------------');
-    console.log('processing /posts/add request');
-
-    let newPostData = req.body.newPostData;
-    correctCreatedAtFieldInPostAfterJsonParse(newPostData);
-    newPostData.user = req.app.get('currentUserName');
-    const postsCollection = readJsonFromFileSync(pathToPostJsonFile);
-
-    if (!addPost(postsCollection, newPostData)) {
-        res.status(400).send('error while adding new post');
-    }
-    else {
-        saveJsonToFileSync(postsCollection, pathToPostJsonFile);
+        saveJsonToFileSync(postsCollection, pathToPostsJsonFile);
         res.sendStatus(200);
     }
 });
 
 router.put('/addLike', (req, res) => {
     const userName = req.app.get('currentUserName');
-    if (!userName){
+    if (!userName) {
         res.sendStatus(400);
     }
-    else{
+    else {
         const postId = req.body.id;
-        let postsCollection = readJsonFromFileSync(pathToPostJsonFile);
+        let postsCollection = readJsonFromFileSync(pathToPostsJsonFile);
         let post = postsCollection.find(p => p.id === postId);
         const ix = post.likesFrom.indexOf(userName);
         if (ix >= 0) {
             post.likesFrom.splice(ix, 1);
-            saveJsonToFileSync(postsCollection, pathToPostJsonFile);
+            saveJsonToFileSync(postsCollection, pathToPostsJsonFile);
             res.send({icon: pathToNotLikedIcon, count: post.likesFrom.length});
         }
         else {
             post.likesFrom.push(userName);
-            saveJsonToFileSync(postsCollection, pathToPostJsonFile);
+            saveJsonToFileSync(postsCollection, pathToPostsJsonFile);
             res.send({icon: pathToLikedIcon, count: post.likesFrom.length});
         }
     }
@@ -186,15 +210,21 @@ function getPaginatedPosts(postsCollection, filterConfig,
     }
 
     tmpPosts.forEach(post => {
-        if (post.likesFrom.indexOf(currentUserName) >= 0) {
-            post.pathToLikeIcon = pathToLikedIcon;
-        }
-        else {
-            post.pathToLikeIcon = pathToNotLikedIcon;
-        }
+        setPostLikesData(post, currentUserName)
     });
 
     return tmpPosts.slice(numOfPostToSkip, numOfPostToSkip + numOfPostsToLoad);
+}
+
+function setPostLikesData(post, currentUserName){
+    post.likesCount = post.likesFrom.length;
+    if (post.likesFrom.indexOf(currentUserName) >= 0) {
+        post.pathToLikeIcon = pathToLikedIcon;
+    }
+    else {
+        post.pathToLikeIcon = pathToNotLikedIcon;
+    }
+    delete post.likesFrom;
 }
 
 function getPostById(postsCollection, id) {

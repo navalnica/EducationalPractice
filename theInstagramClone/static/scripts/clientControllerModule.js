@@ -1,9 +1,26 @@
-/* TODO:
-   upload photos via multer
-   add long polling
-*/
+/*
+    to test:
+
+    likes
+    site title click
+ */
 
 let clientControllerModule = function () {
+
+    const socket = io.connect('http://localhost:3000');
+    const reloadPostsSocketMessage = 'reloadPosts';
+    const reloadUserSocketMessage = 'reloadUser';
+
+    socket.on(reloadPostsSocketMessage, ()=>{
+       console.log('reloadPosts socket event. reloading posts...');
+       resetNumberOfVisiblePosts();
+       requestAndLoadFilteredPostsFromServerAsynchronously();
+    });
+    socket.on(reloadUserSocketMessage, ()=>{
+        console.log('reloadUserInfo socket event. updating current user info');
+        loadCurrentUserNameFromLocalStorage();
+        initializeInterfaceForUser();
+    });
 
     const localStorageCurrentUserNameFieldName = 'currentUserName';
 
@@ -25,6 +42,7 @@ let clientControllerModule = function () {
 
     let numberOfVisiblePosts = 0;
     let numberOfPostsToLoad = 10;
+    let uploadedPhotoName = null;
 
     document.addEventListener('DOMContentLoaded', async function () {
 
@@ -39,7 +57,7 @@ let clientControllerModule = function () {
         document.querySelector('#content').addEventListener('click', async function (event) {
 
             if (event.target.closest('.post-likes')) {
-                const result = await likeEventListener(event);
+                await likeEventListener(event);
             }
 
             if (event.target.closest('.post-image')) {
@@ -59,7 +77,7 @@ let clientControllerModule = function () {
                 fillPostTemplateWithData(modalPostNode, curPost);
                 modalPostNode.querySelector('.post').setAttribute('id', curPost.id);
                 if (curPost.isEditable) {
-                    modalPostNode.querySelector('.edit').addEventListener('click', (event) => {
+                    modalPostNode.querySelector('.edit').addEventListener('click', () => {
                         modalDiv.innerHTML = "";
 
                         let modalEditingNode = document.importNode(modalEditingTemplate, true);
@@ -73,7 +91,8 @@ let clientControllerModule = function () {
 
                         fillPostTemplateWithData(modalEditingNode, curPost);
 
-                        modalEditingNode.querySelector('#editing-image-file').addEventListener('change', checkSelectedImageFile);
+                        modalEditingNode.querySelector('#editing-image-file').addEventListener(
+                            'change', checkSelectedImageFile);
 
                         modalEditingNode.querySelector('.save').addEventListener('click', () => {
 
@@ -96,9 +115,8 @@ let clientControllerModule = function () {
                                 }
                             }
 
-                            let files = form.elements['image-file'].files;
-                            if (files.length === 1) {
-                                editedPostData.photoLink = 'photos/' + files[0].name;
+                            if (uploadedPhotoName){
+                                editedPostData.photoLink = uploadedPhotoName;
                             }
 
                             // send xhr on edit
@@ -112,13 +130,14 @@ let clientControllerModule = function () {
                                     console.log(`server responded with "${response}"`);
                                     resetNumberOfVisiblePosts();
                                     requestAndLoadFilteredPostsFromServerAsynchronously();
+
+                                    socket.emit(reloadPostsSocketMessage);
                                 })
                                 .catch(function (err) {
                                     console.error(`error while processing xhr on /posts/edit`);
                                     console.error(`err: ${err}`);
                                 });
 
-                            debugger;
                             modalDiv.style.display = 'none';
                             curHashtagDiv = filterHashtagsDiv;
                         });
@@ -146,6 +165,8 @@ let clientControllerModule = function () {
                                 console.log(`server responded with "${response}"`);
                                 resetNumberOfVisiblePosts();
                                 requestAndLoadFilteredPostsFromServerAsynchronously();
+
+                                socket.emit(reloadPostsSocketMessage);
                             })
                             .catch(function (err) {
                                 console.error(`error while processing xhr on /posts/delete`);
@@ -159,7 +180,7 @@ let clientControllerModule = function () {
                 }
 
                 modalPostNode.querySelector('.post-likes').addEventListener('click', async function (event) {
-                    const likesData = await likeEventListener(event, true);
+                    await likeEventListener(event, true);
                 });
 
                 modalDiv.style.display = 'block';
@@ -185,12 +206,10 @@ let clientControllerModule = function () {
             let newPostData = {};
             newPostData.createdAt = new Date();
             modalCreatingNode.querySelector('.post-user').innerText = currentUserName;
+            modalCreatingNode.querySelector('.post-date').innerText = `${newPostData.createdAt.getDate()}/` +
+                `${(newPostData.createdAt.getMonth() + 1)}/${newPostData.createdAt.getFullYear()}`;
 
-            modalCreatingNode.querySelector('.post-date').innerText =
-                `${newPostData.createdAt.getDate()}/${(newPostData.createdAt.getMonth() + 1)}/
-                ${newPostData.createdAt.getFullYear()}`;
-
-            modalCreatingNode.querySelector('.save').addEventListener('click', () => {
+            modalCreatingNode.querySelector('.save').addEventListener('click', async () => {
 
                 const form = document.querySelector('#creating-form');
                 newPostData.description = form.elements['description'].value;
@@ -209,15 +228,7 @@ let clientControllerModule = function () {
                     }
                 }
 
-                let files = form.elements['image-file'].files;
-                if (files.length === 1) {
-                    newPostData.photoLink = 'photos/' + files[0].name;
-                }
-                else {
-                    // TODO: check
-                    debugger;
-                    return;
-                }
+                newPostData.photoLink = uploadedPhotoName;
 
                 // save changes
                 const xhrParams = {
@@ -229,6 +240,8 @@ let clientControllerModule = function () {
                         console.log(`server responded with "${response}"`);
                         resetNumberOfVisiblePosts();
                         requestAndLoadFilteredPostsFromServerAsynchronously();
+
+                        socket.emit(reloadPostsSocketMessage);
                     })
                     .catch(function (err) {
                         console.error(`error while processing xhr on /posts/add`);
@@ -269,10 +282,12 @@ let clientControllerModule = function () {
                         console.log(`server responded with "${response}"`);
                         modalDiv.style.display = 'none';
                         currentUserName = name;
-                        setCurrentUserNameToLocalStorage(name);
+                        setCurrentUserNameToLocalStorage();
                         initializeInterfaceForUser();
                         resetNumberOfVisiblePosts();
                         requestAndLoadFilteredPostsFromServerAsynchronously();
+
+                        socket.emit(reloadUserSocketMessage);
                     })
                     .catch(function (err) {
                         console.error(`error while authenticating`);
@@ -291,6 +306,8 @@ let clientControllerModule = function () {
             initializeInterfaceForUser();
             resetNumberOfVisiblePosts();
             requestAndLoadFilteredPostsFromServerAsynchronously();
+
+            socket.emit(reloadUserSocketMessage);
         });
 
         document.querySelector('#my-photos').addEventListener('click', () => {
@@ -343,7 +360,7 @@ let clientControllerModule = function () {
             requestAndLoadFilteredPostsFromServerAsynchronously();
         });
 
-        document.querySelector('#siteTitle').addEventListener('click', event=>{
+        document.querySelector('#siteTitle').addEventListener('click', ()=>{
             clearFilterFields();
             resetNumberOfVisiblePosts();
             requestAndLoadFilteredPostsFromServerAsynchronously();
@@ -392,6 +409,37 @@ let clientControllerModule = function () {
         });
     }
 
+    async function sendPhotoToServer(file) {
+
+        return new Promise(function (resolve, reject) {
+            const xhr = new XMLHttpRequest();
+
+            xhr.open('put', '/posts/sendPhoto');
+
+            xhr.onload = function () {
+                if (this.status >= 200 && this.status < 300) {
+                    resolve(xhr.response);
+                } else {
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                }
+            };
+
+            xhr.onerror = function () {
+                reject({
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            };
+
+            const formData = new FormData();
+            formData.append('photo', file);
+            xhr.send(formData);
+        });
+    }
+
     function requestAndLoadFilteredPostsFromServerAsynchronously() {
         const xhrParams = {
             filterConfig: filterConfig,
@@ -422,6 +470,8 @@ let clientControllerModule = function () {
             id: id
         };
         const likesData = JSON.parse(await makeAsyncXmlHttpRequest('put', '/posts/addLike', xhrParams));
+        socket.emit(reloadPostsSocketMessage);
+
         setPostLikesInfo(event.target.closest('.post-likes'), likesData.icon, likesData.count);
 
         if (updatePostInPostsContainer) {
@@ -479,8 +529,8 @@ let clientControllerModule = function () {
         postHTMLNode.querySelector(".post-image").querySelector('img').setAttribute('src', postData.photoLink);
 
         postHTMLNode.querySelector(".post-user").innerText = postData.user;
-        let dateString = `${postData.createdAt.getDate()}/${(postData.createdAt.getMonth() + 1)}/${postData.createdAt.getFullYear()}`;
-        postHTMLNode.querySelector(".post-date").innerText = dateString;
+        postHTMLNode.querySelector(".post-date").innerText = `${postData.createdAt.getDate()}/` +
+        `${(postData.createdAt.getMonth() + 1)}/${postData.createdAt.getFullYear()}`;
 
         let descriptionDiv = postHTMLNode.querySelector('.post-description');
         if (descriptionDiv) {
@@ -499,12 +549,11 @@ let clientControllerModule = function () {
             hashtagsDivNode.innerText = hashtags;
         }
 
-
         let likesDiv = postHTMLNode.querySelector('.post-likes');
         if (likesDiv) {
             // checks if current user has liked the post
             likesDiv.querySelector('img').setAttribute('src', postData.pathToLikeIcon);
-            likesDiv.querySelector('span').innerText = postData.likesFrom.length.toString();
+            likesDiv.querySelector('span').innerText = postData.likesCount.toString();
         }
 
         // for editing post
@@ -627,7 +676,7 @@ let clientControllerModule = function () {
 
     // ------------ end of hashtags functions ----------------
 
-    function checkSelectedImageFile(event) {
+    async function checkSelectedImageFile(event) {
         let file = event.target.files[0];
 
         let fileTypes = [
@@ -641,7 +690,11 @@ let clientControllerModule = function () {
         if (fileTypes.indexOf(file.type) > -1) {
             // correct file selected
             errorSpan.style.display = 'none';
-            document.querySelector('.image-preview').setAttribute('src', "photos/" + file.name);
+
+            // send photo to the server
+            uploadedPhotoName = await sendPhotoToServer(file);
+
+            document.querySelector('.image-preview').setAttribute('src', uploadedPhotoName);
             btn.disabled = false;
         }
         else {
@@ -659,18 +712,22 @@ let clientControllerModule = function () {
         likesSpan.innerText = likesCount.toString();
     }
 
+    async function getCurrentUserFromServer(){
+        return await makeAsyncXmlHttpRequest('get', '/getCurrentUserName');
+    }
+
     async function init() {
-        // TODO init directly in DOM.onload event listener
         content = document.getElementById('content');
         curHashtagDiv = filterHashtagsDiv;
 
         setFilterConfig(null);
+        currentUserName = await getCurrentUserFromServer();
+        setCurrentUserNameToLocalStorage();
+        initializeInterfaceForUser();
         resetNumberOfVisiblePosts();
         requestAndLoadFilteredPostsFromServerAsynchronously();
         await updateUsersListByAsynchronousRequestToServer();
         fillUserSelectWithOptions();
-        loadCurrentUserNameFromLocalStorage();
-        initializeInterfaceForUser();
     }
 
 }();
