@@ -8,9 +8,8 @@
     <link rel="stylesheet" type="text/css" href="css/index.css">
 
     <!--   scripts   -->
-    <script src="scripts/dataModule.js"></script>
-    <script src="scripts/controllerModule.js"></script>
-    <script src="scripts/viewModule.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.dev.js"></script>
+    <script src="scripts/clientControllerModule.js"></script>
 
 </head>
 
@@ -24,11 +23,11 @@
 <div class="page">
     <header>
         <div class="header-title">
-            <h2>The Instagram Clone</h2>
+            <h2 id="siteTitle">The Instagram Clone</h2>
         </div>
 
         <div class="current-user-name">
-            <p>Sieviaryn Budrys</p>
+            <p>Not initialized user name</p>
         </div>
 
         <nav class="header-nav">
@@ -48,7 +47,7 @@
         </section>
 
         <aside class="right-block">
-            <form name="filter-form" id="filter-form" action="#">
+            <form name="filter-form" id="filter-form">
 
 
                 <h3>Filter</h3>
@@ -92,7 +91,6 @@
                     <button type="button" class="filter-button filter-apply">Apply</button>
                     <button type="button" class="filter-button filter-clear">Clear</button>
                 </div>
-
 
             </form>
 
